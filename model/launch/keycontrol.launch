@@ -1,0 +1,5 @@
+<launch>
+  <!-- キーボードによる制御ノード -->
+  <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" args="/cmd_vel:=/vmegarover/diff_drive_controller/cmd_vel">
+  </node>
+</launch>

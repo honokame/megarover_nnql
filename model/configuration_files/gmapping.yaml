@@ -1,0 +1,8 @@
+#map_update_interval: 1.0
+#temporalUpdate: 1.0
+maxUrange: 30.0
+delta: 0.055
+xmin: -50.0
+xmax: 50.0
+ymin: -50.0
+ymax: 50.0

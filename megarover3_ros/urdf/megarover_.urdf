@@ -1,0 +1,37 @@
+<robot name="megarover3">
+  <!--<link name="base_footprint"/>-->
+  <link name="base_link">
+    <!--<visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="/home/catkin_ws/src/megarover3_ros/meshes/DAE/megarover.dae"/>
+      </geometry>
+    </visual>
+  </link>->
+  <joint name="base_joint" type="fixed">
+    <origin xyz="0 0 0"/>
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+  </joint>
+  <material name="orange">
+    <color rgba="1.0 0.5 0.2 1"/>
+  </material>
+  <material name="gray">
+    <color rgba="0.2 0.2 0.2 1"/>
+  </material>
+  <link name="horizontal_laser_link">
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+  <joint name="horizontal_laser_link_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="horizontal_laser_link"/>
+    <origin rpy="3.14159 0.0 0.0" xyz="0.1 0 0.06"/>
+  </joint>
+</robot>
+

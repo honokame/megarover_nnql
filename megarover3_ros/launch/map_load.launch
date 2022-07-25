@@ -1,0 +1,7 @@
+<launch>
+  <!-- map load -->
+  <arg name="map_file" default="$(find map_tools)/map/map.yaml"/>
+  <!--arg name="map_file" default"$(find map_tools)/map/dst.yaml"/>-->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
+</launch>  
+  

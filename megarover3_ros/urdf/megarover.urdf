@@ -1,0 +1,19 @@
+<robot name="megarover3"
+  <link name="base_footprint">
+
+  <joint name="base_joint" type="fixed">
+   <parent link="base_footprint"/>
+   <child link="base_link"/>
+  </joint>
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.3 0.3 0.2"/>
+      </geometry>
+      <origin xyz="0 0 0"/>
+      <material name="orange">
+        <color rgba="1.0 0.5 0.2 1"/>
+      </material>
+    </visual>
+  </link>
+</robot>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <arg name="model" default="$(find model)/robots/vmegarover.urdf.xacro"/>
+  <arg name="rvizconfig" default="$(find model)/configuration_files/rviz/amcl.rviz"/>  
+
+  <!-- gazebo world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find model)/worlds/sample.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <!-- load the urdf into the ros parameter server -->
+  <param name="robot_description"
+    command="$(find xacro)/xacro --inorder '$(arg model)'" />
+
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model vmegarover -param robot_description"/>
+  
+  <!-- key control -->
+  <include file="$(find model)/launch/keycontrol.launch"/>
+
+  <!-- controll -->
+  <include file="$(find model)/launch/control.launch"/>
+
+  <!-- map server -->
+  <arg name="map_file" default="$(find model)/map/sample.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
+  
+  <!-- amcl -->
+  <node pkg="amcl" type="amcl" name="amcl" output="screen" args="/scan:=/scan" clear_params="true">
+    <rosparam command="load" file="$(find model)/configuration_files/amcl.yaml"/>
+    <param name="base_frame_id" value="base_link"/>
+    <param name="odom_frame_id" value="odom" />
+    <param name="global_frame_id" value="map"/>
+  </node>
+
+  <!-- rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+</launch>

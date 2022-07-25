@@ -1,0 +1,24 @@
+# costmap common params for MEGAROVER
+
+# ロボットの大きさに関するパラメータ
+#footprint: [[0.1, -0.15], [0.1, 0.15], [-0.2, 0.15], [-0.2, -0.15]]
+#footprint: [[0.1, -0.23], [0.1, 0.23], [-0.2, 0.23], [-0.2, -0.23]]
+
+#obstacle_layerの設定
+obstacle_layer:
+  enabled: true
+
+  # これ以下の距離にある物体を障害物として扱う
+  obstacle_range: 3.0 #3.5
+
+  # これ以下の距離に物体が検出されない場合、ロボットとその距離までに障害物はないとして扱う
+  # これ以上の距離を自由空間とする
+  raytrace_range: 3.5 #8.0
+  inflation_radius: 0.5
+  cost_scalling_factor: 3.0
+
+  # LRFの設定
+  observation_sources: laser_scan_sensor
+  laser_scan_sensor: {sensor_frame: lrf_link, data_type: LaserScan, topic: scan, marking: true, clearing: true}
+
+  map_type: costmap
