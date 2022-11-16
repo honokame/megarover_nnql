@@ -5,14 +5,13 @@ import rospy
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.msg import ModelState
 
-def set_model():
-  rospy.init_node('spawn') #ノードの初期化
-  #rospy.wait_for_service('/gazebo/set_model_state')
+def set_model(name, x, y): #指定位置にセット
+  rospy.init_node('nnql') #ノードの初期化
   
   model_state = ModelState()
-  model_state.model_name = 'vmegarover'
-  model_state.pose.position.x = 1
-  model_state.pose.position.y = 0
+  model_state.model_name = name
+  model_state.pose.position.x = x
+  model_state.pose.position.y = y
   model_state.pose.position.z = 0
   model_state.pose.orientation.x = 0
   model_state.pose.orientation.y = 0
@@ -33,7 +32,4 @@ def set_model():
     rospy.loginfo("Service did not process request: "+str(e))
 
 if __name__ == '__main__':
-#  try
-   set_model()
-#  expect rospy.ROSInterruptException:
-#    pass
+   set_model('vmegarover', 0, 0)
