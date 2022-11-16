@@ -1,0 +1,54 @@
+.TH "examples/example_node.cpp" 3 "Wed Sep 12 2018" "Version 0.1" "robust_multirobot_map_merging" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+examples/example_node.cpp \- Example of the package utilisation\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'graph_utils/graph_utils_functions\&.h'\fP
+.br
+\fC#include 'pairwise_consistency/pairwise_consistency\&.h'\fP
+.br
+\fC#include 'robot_local_map/robot_local_map\&.h'\fP
+.br
+\fC#include 'global_map_solver/global_map_solver\&.h'\fP
+.br
+\fC#include 'findClique\&.h'\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <iostream>\fP
+.br
+\fC#include <eigen3/Eigen/Geometry>\fP
+.br
+\fC#include <chrono>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBmain\fP (int argc, char *argv[])"
+.br
+.RI "\fIMain function of an example program using this package\&. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Example of the package utilisation\&. 
+
+
+.PP
+Definition in file \fBexample_node\&.cpp\fP\&.
+.SH "Function Documentation"
+.PP 
+.SS "int main (int argc, char * argv[])"
+
+.PP
+Main function of an example program using this package\&. In this example, we use 3 input files <trajectory robot1 \&.g2o file> <trajectory robot2 \&.g2o file> <inter robot loop closures \&.g2o file> to produce a resulting global pose graph\&. 
+.PP
+Definition at line 22 of file example_node\&.cpp\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for robust_multirobot_map_merging from the source code\&.

@@ -1,0 +1,80 @@
+.TH "robot_local_map::RobotLocalMap" 3 "Wed Sep 12 2018" "Version 0.1" "robust_multirobot_map_merging" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+robot_local_map::RobotLocalMap \- 
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <robot_local_map\&.h>\fP
+.PP
+Inherits \fBrobot_local_map::RobotMeasurements\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBRobotLocalMap\fP (const std::string &file_name)"
+.br
+.RI "\fIConstructor\&. \fP"
+.ti -1c
+.RI "const \fBgraph_utils::Trajectory\fP & \fBgetTrajectory\fP () const "
+.br
+.RI "\fIAccessor\&. \fP"
+.in -1c
+.SS "Private Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBgraph_utils::Trajectory\fP \fBtrajectory_\fP"
+.br
+.RI "\fILocal trajectory of the robot\&. \fP"
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Detailed Description"
+.PP 
+Class that contains the local map of a single robot\&. 
+.PP
+Definition at line 12 of file robot_local_map\&.h\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "robot_local_map::RobotLocalMap::RobotLocalMap (const std::string & file_name)"
+
+.PP
+Constructor\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile_name\fP Name of the file containing the robot measurements\&. 
+.RE
+.PP
+
+.PP
+Definition at line 8 of file robot_local_map\&.cpp\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "const \fBgraph_utils::Trajectory\fP & robot_local_map::RobotLocalMap::getTrajectory () const"
+
+.PP
+Accessor\&. 
+.PP
+\fBReturns:\fP
+.RS 4
+the robot trajectory 
+.RE
+.PP
+
+.PP
+Definition at line 12 of file robot_local_map\&.cpp\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "\fBgraph_utils::Trajectory\fP robot_local_map::RobotLocalMap::trajectory_\fC [private]\fP"
+
+.PP
+Local trajectory of the robot\&. 
+.PP
+Definition at line 30 of file robot_local_map\&.h\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for robust_multirobot_map_merging from the source code\&.

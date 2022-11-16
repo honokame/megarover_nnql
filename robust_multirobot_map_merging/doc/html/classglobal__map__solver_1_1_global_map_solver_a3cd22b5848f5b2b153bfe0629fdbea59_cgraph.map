@@ -1,0 +1,12 @@
+<map id="global_map_solver::GlobalMapSolver::solveGlobalMap" name="global_map_solver::GlobalMapSolver::solveGlobalMap">
+<area shape="rect" id="node2" href="$classpairwise__consistency_1_1_pairwise_consistency.html#a188821b4aef50f75e63d0e868585ef0f" title="Computation of the consistency matrix. " alt="" coords="276,89,505,159"/>
+<area shape="rect" id="node9" href="$namespacegraph__utils.html#aa63b9e9c4cf0a0db956aa09fea329328" title="This function prints the consistency matrix to the format expected by the maximum clique solver..." alt="" coords="295,183,486,225"/>
+<area shape="rect" id="node10" href="$namespacegraph__utils.html#a4150234137044c02b51071ff0b4f0588" title="This function prints a list of consistent loop closures in a file. " alt="" coords="300,249,481,290"/>
+<area shape="rect" id="node11" href="$classpairwise__consistency_1_1_pairwise_consistency.html#a7eb762acb6c383a9e167a49e1c99905b" title="Accessor. " alt="" coords="314,313,467,369"/>
+<area shape="rect" id="node3" href="$namespacegraph__utils.html#a5e9717352bed2d3c8ce7a639ea19f3b6" title="This function check if a pose is include in a trajectory. " alt="" coords="594,5,766,32"/>
+<area shape="rect" id="node4" href="$classpairwise__consistency_1_1_pairwise_consistency.html#a8d713a72710457b975009c361cc69a0a" title="This function returns the transform the two specified poses on the desired robot trajectory. " alt="" coords="601,56,759,112"/>
+<area shape="rect" id="node6" href="$classpairwise__consistency_1_1_pairwise_consistency.html#af3eac08aa298b40cde37fe40e930778b" title="Computes the consistency loop : aXij + abZjl + bXlk &#45; abZik (see references) " alt="" coords="589,136,771,192"/>
+<area shape="rect" id="node8" href="$classpairwise__consistency_1_1_pairwise_consistency.html#a2b950355e607d737fefef75bc6c45141" title="Compute the Mahalanobis Distance of the input pose (result of pose_a&#45;pose_b) " alt="" coords="553,216,807,272"/>
+<area shape="rect" id="node5" href="$namespacegraph__utils.html#ab870b094ec3889879a4d3d87f7815ec2" title="This function compose (&#45;) geometric poses with covariance. " alt="" coords="861,74,1025,115"/>
+<area shape="rect" id="node7" href="$namespacegraph__utils.html#a77a9dbc4f10af715a643164166092df6" title="This function compose (+) geometric poses with covariance. " alt="" coords="855,151,1032,177"/>
+</map>

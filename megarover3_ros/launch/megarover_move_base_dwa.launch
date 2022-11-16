@@ -1,17 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- 
   MEGAROVER move base demo launch
   USE STATIC MAP
 -->
 
 <launch>
-
   <!-- 引数 -->
   <arg name="rover_type"  default="mega3"  doc="mega3 / outdoor" />
   <arg name="lrf"         default="tg30"       doc="urg / tg30"/>
 
   <!-- オドメトリの配信ノード -->
   <node pkg="megarover3_ros" type="pub_odom" name="pub_odom" />
-
 
   <!-- URG-04LX-UG01の場合 -->
   <group if="$(eval lrf=='urg')">
@@ -85,12 +84,10 @@
       <param name="range_max"    type="double" value="30.0" />
       <param name="frequency"    type="double" value="10.0"/>
     </node>
-  </group>
-
-  
+  </group> 
  
   <!-- mapサーバー -->
-  <arg name="map_file" default="$(find map_tools)/map/dst.yaml"/>　<!--マップファイルのパスの指定 -->
+  <arg name="map_file" default="$(find map_tools)/map/map.yaml"/>　<!--マップファイルのパスの指定 -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
  
   <!-- 
@@ -98,46 +95,13 @@
     各パラメータについては http://wiki.ros.org/amcl
     を参照してください。
   -->
-  <!--<include file="$(find amcl)/examples/amcl_diff.launch" />-->
-  <node pkg="amcl" type="amcl" name="amcl" output="screen" args="/scan:=/scan">
-    <param name="gui_publish_rate" value="50.0"/> <!--5.0-->
-    <param name="odom_model_type" value="diff"/>
-    <param name="min_particles" value="500"/> <!-- パーティクル数 -->
-    <param name="max_particles" value="3000"/> <!-- 2000-->
-    <param name="kld_err" value="0.05"/>
-    <param name="kld_z" value="0.95"/>
-    
-    <!-- オドメトリ -->
-    <param name="odom_alpha1" value="7.0"/> <!-- 推定ノイズ -->
-    <param name="odom_alpha2" value="10.0"/>
-    <param name="odom_alpha3" value="7.0"/>
-    <param name="odom_alpha4" value="10.0"/>
-    
-    <!-- LRF -->
-    <param name="laser_max_beams" value="180"/> <!-- フィルタ更新時のビームの個数 60-->
-    <param name="laser_z_hit" value="0.7"/> <!-- 重み -->
-    <param name="laser_z_short" value="0.05"/>
-    <param name="laser_z_max" value="0.05"/>
-    <param name="laser_z_rand" value="0.3"/>
-    <param name="laser_sigma_hit" value="0.2"/>
-    <param name="laser_lambda_short" value="0.1"/>
-    <param name="laser_lambda_short" value="0.1"/>
-    <param name="laser_model_type" value="likelihood_field"/>
-    <!-- <param name="laser_model_type" value="beam"/> -->
-    <param name="laser_likelihood_max_dist" value="2.0"/>
-    <param name="update_min_d" value="0.05"/>
-    <param name="update_min_a" value="0.03"/>
-    
+  <node pkg="amcl" type="amcl" name="amcl" output="screen" args="/scan:=/scan" clear_params="true">
+    <rosparam command="load" file="$(find megarover3_ros)/configuration_files/amcl.yaml"/>
+    <param name="base_frame_id" value="base_link"/>
     <param name="odom_frame_id" value="odom"/>
-    <param name="base_frame_id" value="base_link" />
-    
-    <param name="resample_interval" value="1"/>
-    <param name="transform_tolerance" value="0.2"/>
-    <param name="recovery_alpha_slow" value="0.001"/>
-    <param name="recovery_alpha_fast" value="0.01"/>
-    <param name="use_map_topic" value="false" />
+    <param name="global_frame_id" value="map"/>
   </node>
- 
+
   <!--- 経路計画，指令値生成ノード　move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" args="/cmd_vel:=/rover_twist">
     <rosparam file="$(find megarover3_ros)/configuration_files/megarover_costmap_common_params.yaml" command="load" ns="global_costmap" />
@@ -146,6 +110,12 @@
     <rosparam file="$(find megarover3_ros)/configuration_files/megarover_global_costmap_params.yaml" command="load" />
     <rosparam file="$(find megarover3_ros)/configuration_files/megarover_dwa_local_planner_params.yaml" command="load" />
     <rosparam file="$(find megarover3_ros)/configuration_files/megarover_move_base_params.yaml" command="load" />
+    <param name="global_costmap/global_frame" value="map" />
+    <param name="global_costmap/robot_base_frame" value="base_link" />
+    <param name="local_costmap/laser_scan_sensor/sensor_frame" value="laser_link" />
+    <!--param name="local_costmap/laser_scan_sensor/topic" value="scan" /-->
+    <param name="local_costmap/global_frame" value="odom" />
+    <param name="local_costmap/robot_base_frame" value="base_link" />
   </node>
 
   <!-- Rviz -->

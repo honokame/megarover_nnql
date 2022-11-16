@@ -1,6 +1,6 @@
 # DWA Planner params for MEGAROVER
 # 各パラメータについては http://wiki.ros.org/dwa_local_planner?distro=kinetic を参照してください。
-
+#デフォルトの２倍にしたものが多い
 DWAPlannerROS:
   acc_lim_x: 2.0
   acc_lim_y: 0.0

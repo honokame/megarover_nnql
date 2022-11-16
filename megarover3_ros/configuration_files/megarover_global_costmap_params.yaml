@@ -12,19 +12,19 @@ global_costmap:
 
   #inflation_layerの設定
   inflation_layer:
-    inflation_radius: 0.1
-
+    inflation_radius: 0.22 #0.22
 
   # 更新頻度
-  update_frequency: 10.0 #2.0
-  publish_frequency: 10.0 #2.0
-  static_map: true
-  # タイムスタンプの差の許容量
+  update_frequency: 2.0 #2.0
+  publish_frequency: 2.0 #2.0
+#static_map: true
+  
+# タイムスタンプの差の許容量
   transform_tolerance: 0.5
 
   static_layer:
     enabled: true
     map_topic: "/map"
-    track_unknown_space: false
-    subscribe_to_updates: true
+    track_unknown_space: false #false：未知スペースをfreeにする
+    subscribe_to_updates: true #mapトピックに加えupdateも受け取るか
 
