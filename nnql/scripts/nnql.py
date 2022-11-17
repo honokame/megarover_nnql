@@ -5,6 +5,7 @@ import numpy as np
 
 import rospy
 from gazebo_msgs.srv import SetModelState
+from gazebo_msgs.srv import GetModelState
 from gazebo_msgs.msg import ModelState
 
 def set_model(name, x, y, yaw): #指定位置にセット
@@ -25,7 +26,8 @@ def set_model(name, x, y, yaw): #指定位置にセット
   model_state.twist.angular.x = 0
   model_state.twist.angular.y = 0
   model_state.twist.angular.z = 0
-  print(yaw)
+  #print(yaw)
+  
   rospy.wait_for_service('/gazebo/set_model_state')
   try:
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
@@ -33,6 +35,15 @@ def set_model(name, x, y, yaw): #指定位置にセット
   except rospy.ServiceException as e:
     rospy.loginfo("Service did not process request: "+str(e))
 
+def get_model(name):
+  rospy.wait_for_service('/gazebo/get_model_state')
+  try:
+    serviceResponse = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
+    get_state = serviceResponse(model_name=name)
+  except rospy.ServiceException as exc:
+    rospy.loginfo("Service did not process request: "+str(exc))
+  return get_state
+
 if __name__ == '__main__':
    set_model('vmegarover', 0, 0, np.random.randint(0,361))
-
+   print(get_model('vmegarover'))
