@@ -25,7 +25,7 @@ def set_model(name, x, y, yaw): #指定位置にセット
   model_state.twist.angular.x = 0
   model_state.twist.angular.y = 0
   model_state.twist.angular.z = 0
-
+  print(yaw)
   rospy.wait_for_service('/gazebo/set_model_state')
   try:
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
@@ -34,4 +34,5 @@ def set_model(name, x, y, yaw): #指定位置にセット
     rospy.loginfo("Service did not process request: "+str(e))
 
 if __name__ == '__main__':
-   set_model('vmegarover', 0, 0, 270)
+   set_model('vmegarover', 0, 0, np.random.randint(0,361))
+
