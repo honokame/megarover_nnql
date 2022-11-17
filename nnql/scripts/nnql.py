@@ -29,22 +29,21 @@ def set_model(name, x, y, yaw): #指定位置にセット
   model_state.twist.angular.x = 0
   model_state.twist.angular.y = 0
   model_state.twist.angular.z = 0
-  #print(yaw)
   
   rospy.wait_for_service('/gazebo/set_model_state')
   try:
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
-    resp = set_state(model_state)
-  except rospy.ServiceException as e:
-    rospy.loginfo("Service did not process request: "+str(e))
+    res = set_state(model_state)
+  except rospy.ServiceException, e:
+    print("Service call failed: %s" %e)
 
 def get_model(name):
   rospy.wait_for_service('/gazebo/get_model_state')
   try:
     serviceResponse = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
     get_state = serviceResponse(model_name=name)
-  except rospy.ServiceException as exc:
-    rospy.loginfo("Service did not process request: "+str(exc))
+  except rospy.ServiceException, e:
+    print("Service call failed: %s" %e)
   return get_state
 
 def get_status(name):
