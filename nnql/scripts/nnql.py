@@ -9,7 +9,8 @@ from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
 from gazebo_msgs.msg import ModelState
 
-pos = [[0,0],[1,0],[0,1],[1,1],[2,1],[1,2],[2,2]]
+pos_start = [[2.2,2],[2.2,1],[2.2,3],[5.5,1],[4.5,7.5]]
+pos_goal = [[2,5],[2,7],[2,1],[5.2,3],[5.2,4],[6,8.5]]
 
 def set_model(name, x, y, yaw): #指定位置にセット
   #rospy.init_node('nnql') #ノードの初期化
@@ -56,13 +57,16 @@ def get_status(name):
   q4 = model_state.pose.orientation.w
   eular = tf.transformations.euler_from_quaternion((q1, q2, q3, q4))
   yaw = round(eular[2]*180/np.pi)
-  print(x, y, yaw)
+  print(str(name),x, y, yaw)
 
 if __name__ == '__main__':
    rospy.init_node('nnql') #ノードの初期化
    #np.random.shuffle(pos)
    #x, y = pos[0] 
-   x, y = pos[np.random.randint(0, len(pos))]
-   set_model('vmegarover', x, y, np.random.randint(0,361))
+   start_y, start_x = pos_start[np.random.randint(0, len(pos_start))]
+   goal_y, goal_x = pos_goal[np.random.randint(0, len(pos_goal))]
+   set_model('vmegarover', start_x, start_y, np.random.randint(0,361))
+   set_model('target', goal_x, goal_y, 0)
    #set_model('vmegarover', 0, 0, -90)
    get_status('vmegarover')
+   get_status('target')

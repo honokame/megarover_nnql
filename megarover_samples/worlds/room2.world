@@ -16,7 +16,7 @@
     <include>
       <uri>model://checkerboard_plane</uri>
       <name>target</name>
-      <pose>5 2 0</pose>
+      <pose>5 2 0 0 0 0</pose>
     </include>
     <model name='ground_plane'>
       <static>1</static>
