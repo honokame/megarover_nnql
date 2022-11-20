@@ -5,7 +5,7 @@
 
   <!-- gazebo world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find megarover_samples)/worlds/room.world"/>
+    <arg name="world_name" value="$(find megarover_samples)/worlds/room2.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
@@ -17,7 +17,7 @@
   <param name="robot_description"
     command="$(find xacro)/xacro --inorder '$(arg model)'" />
 
-  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model vmegarover -param robot_description"/>
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model vmegarover -param robot_description -x 2 -y 2.3 -z 0 -R 0 -P 0 -Y 0 "/>
   
   <!-- key control -->
   <!--<include file="$(find megarover_samples)/launch/keycontrol.launch"/>-->
