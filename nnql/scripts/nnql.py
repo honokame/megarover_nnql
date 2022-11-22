@@ -9,8 +9,8 @@ from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
 from gazebo_msgs.msg import ModelState
 
-pos_start = [[2.2,2],[2.2,1],[2.2,3],[5.5,1],[4.5,7.5]]
-pos_goal = [[2,5],[2,7],[2,1],[5.2,3],[5.2,4],[6,8.5]]
+pos_start = [[2,2.2],[1,2.2],[3,2.2],[1,5.5],[7.5,4.5]]
+pos_goal = [[5,2],[7,2],[1,2],[3,5.2],[4,5.2],[8.5,5.5]]
 
 def set_model(name, x, y, z, yaw): #指定位置にセット
   #rospy.init_node('nnql') #ノードの初期化
@@ -63,8 +63,8 @@ if __name__ == '__main__':
    rospy.init_node('nnql') #ノードの初期化
    #np.random.shuffle(pos)
    #x, y = pos[0] 
-   start_y, start_x = pos_start[np.random.randint(0, len(pos_start))]
-   goal_y, goal_x = pos_goal[np.random.randint(0, len(pos_goal))]
+   start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
+   goal_x, goal_y = pos_goal[np.random.randint(0, len(pos_goal))]
    set_model('vmegarover', start_x, start_y, 0, np.random.randint(0,361))
    set_model('target', goal_x, goal_y, 0.01, 0)
    #set_model('vmegarover', 0, 0, -90)
