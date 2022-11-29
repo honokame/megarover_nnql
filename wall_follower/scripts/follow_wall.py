@@ -246,7 +246,7 @@ def reverse_left():
 
 def main():
     global pub_, active_ # to use this global variables inside main()
-    
+    count = 0;
     rospy.init_node('reading_laser')
     
     pub_ = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
@@ -283,7 +283,11 @@ def main():
             rospy.logerr('Unknown state!')
         
         pub_.publish(msg)
+        count+=1
+        print(count)
         rate.sleep()
+        if(count == 100):
+          break
 
 if __name__ == '__main__':
     main()
