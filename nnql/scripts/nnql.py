@@ -5,6 +5,7 @@ import numpy as np
 
 import rospy
 import tf
+from subprocess import *
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
 from gazebo_msgs.msg import ModelState
@@ -69,8 +70,10 @@ def get_scan(msg):
   action()
 
 def action():
-  print("go")
-  
+  p = call(['rosrun','wall_follower','wall_follower'])
+  print("finish")
+  rospy.sleep(1)
+
 if __name__ == '__main__':
    rospy.init_node('nnql') #ノードの初期化
    #np.random.shuffle(pos)
@@ -80,8 +83,12 @@ if __name__ == '__main__':
    #set_model('vmegarover', start_x, start_y, 0, np.random.randint(0,361))
    #set_model('target', goal_x, goal_y, 0.01, 0)
    #set_model('vmegarover', 0, 0, -90)
-   get_status('vmegarover')
-   get_status('target')
-   sub = rospy.Subscriber('scan', LaserScan, get_scan)
-   rospy.spin()
+   #get_status('vmegarover')
+   #get_status('target')
+   #action()
+   #sub = rospy.Subscriber('scan', LaserScan, get_scan)
+   #rospy.spin()
+   for i in range(100):
+     action()
+     get_status('vmegarover')
 
