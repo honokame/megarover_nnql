@@ -87,7 +87,7 @@
   </group> 
  
   <!-- mapサーバー -->
-  <arg name="map_file" default="$(find map_tools)/map/map.yaml"/>　<!--マップファイルのパスの指定 -->
+  <arg name="map_file" default="$(find megarover3_ros)/map/map.yaml"/>　<!--マップファイルのパスの指定 -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
  
   <!-- 
