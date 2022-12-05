@@ -61,13 +61,33 @@ def get_status(name):
   yaw = round(eular[2]*180/np.pi)
   print(str(name),x, y, yaw)
 
-def get_scan(msg):
+def get_scan():
+  msg = None
+  while msg is None:
+    try:
+      msg = rospy.wait_for_messeage('/scan', LaserScan, timeout=5)
+      #rang_min = msg.range_min
+      scan = msg.ranges
+      print(scan[1])
+    except:
+      pass
+  #range_min = msg.range_min
+  #scan = msg.ranges 
+
+  #print(scan[1]) 
+  #print(len(scan))
+
+
+def get_scan1():
+  msg = rospy.wait_for_messeage('/scan', LaserScan, timeout=5)
   range_min = msg.range_min
   scan = msg.ranges 
 
   print(scan[1]) 
   print(len(scan))
-  action()
+
+
+
 
 def action():
   p = call(['rosrun','wall_follower','wall_follower'])
@@ -86,9 +106,9 @@ if __name__ == '__main__':
    #get_status('vmegarover')
    #get_status('target')
    #action()
-   #sub = rospy.Subscriber('scan', LaserScan, get_scan)
+   #sub = rospy.Subscriber('scan', LaserScan, get_scan1)
    #rospy.spin()
    for i in range(100):
      action()
+     get_scan1()
      get_status('vmegarover')
-
