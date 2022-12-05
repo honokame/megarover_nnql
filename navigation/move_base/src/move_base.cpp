@@ -46,6 +46,7 @@
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
+int count = 0;
 namespace move_base {
 
   MoveBase::MoveBase(tf2_ros::Buffer& tf) :
@@ -684,6 +685,7 @@ namespace move_base {
     ros::NodeHandle n;
     while(n.ok())
     {
+      //int count = 0;
       if(c_freq_change_)
       {
         ROS_INFO("Setting controller frequency to %.2f", controller_frequency_);
@@ -801,6 +803,7 @@ namespace move_base {
   }
 
   bool MoveBase::executeCycle(geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& global_plan){
+    //int count = 0;
     boost::recursive_mutex::scoped_lock ecl(configuration_mutex_);
     //we need to be able to publish velocity commands
     geometry_msgs::Twist cmd_vel;
@@ -870,6 +873,7 @@ namespace move_base {
 
     //the move_base state machine, handles the control logic for navigation
     switch(state_){
+      //int count = 0;
       //if we are in a planning state, then we'll attempt to make a plan
       case PLANNING:
         {
@@ -916,6 +920,14 @@ namespace move_base {
           last_valid_control_ = ros::Time::now();
           //make sure that we send the velocity command to the base
           vel_pub_.publish(cmd_vel);
+          count += 1;
+          if(count == 10){
+            system("rosnode kill explore");
+            //vel_pub_.shutdown();
+            ros::shutdown();
+            //count = 0;
+            break;
+          }
           if(recovery_trigger_ == CONTROLLING_R)
             recovery_index_ = 0;
         }
