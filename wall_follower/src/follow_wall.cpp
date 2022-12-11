@@ -1,3 +1,4 @@
+#
 /*
 Basic Follow Wall Algorithm
 Author: Roberto Zegers
@@ -272,9 +273,10 @@ int main(int argc, char **argv) {
     // Publish motor commands to the robot and wait 10ms
     motor_command_publisher.publish(motor_command);
     count += 1;
-    ROS_INFO("%d",count);
+    //ROS_INFO("%d",count);
     sleep(0.01); //10
     if(count == 10000){
+      ROS_INFO("finish");
       ros::shutdown();
       //break;
     }
