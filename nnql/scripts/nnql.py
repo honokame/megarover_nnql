@@ -5,6 +5,8 @@ import numpy as np
 
 import rospy
 import tf
+import sys #引数
+import os #ファイル関連
 from subprocess import *
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
@@ -71,6 +73,13 @@ def action():
 
 if __name__ == '__main__':
    rospy.init_node('nnql') #ノードの初期化
+
+   args = sys.argv #引数
+   status_csv = 'status_' + args[1] + '.csv'
+   scan_csv = 'scan_' + args[1] + '.csv'
+   f_status = open(status_csv,'w')
+   f_scan = open(scan_csv,'w')
+   #f.close()
    #np.random.shuffle(pos)
    #x, y = pos[0] 
    start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
