@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /TF1/Frames1
         - /Map1/Position1
-        - /Polygon1/Status1
+        - /MarkerArray1
       Splitter Ratio: 0.5588235259056091
     Tree Height: 728
   - Class: rviz/Selection
@@ -291,6 +291,14 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /move_base/GlobalPlanner/plan
       Unreliable: false
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /explore/frontiers
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
