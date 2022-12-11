@@ -15,8 +15,6 @@ pos_start = [[2,2.2],[1,2.2],[3,2.2],[1,5.5],[7.5,4.5]]
 pos_goal = [[5,2],[7,2],[1,2],[3,5.2],[4,5.2],[8.5,5.5]]
 
 def set_model(name, x, y, z, yaw): #指定位置にセット
-  #rospy.init_node('nnql') #ノードの初期化
-  
   model_state = ModelState()
   model_state.model_name = name
   model_state.pose.position.x = x
@@ -51,8 +49,8 @@ def get_model(name):
 
 def get_status(name):
   model_state = get_model(name)
-  x = round(model_state.pose.position.x) #roundにするかは要検討
-  y = round(model_state.pose.position.y)
+  x = model_state.pose.position.x
+  y = model_state.pose.position.y
   q1 = model_state.pose.orientation.x
   q2 = model_state.pose.orientation.y 
   q3 = model_state.pose.orientation.z
@@ -60,38 +58,15 @@ def get_status(name):
   eular = tf.transformations.euler_from_quaternion((q1, q2, q3, q4))
   yaw = round(eular[2]*180/np.pi)
   print(str(name),x, y, yaw)
+  print(str(name),int(x),int(y),round(yaw))
 
 def get_scan():
-  msg = None
-  while msg is None:
-    try:
-      msg = rospy.wait_for_messeage('/scan', LaserScan, timeout=5)
-      #rang_min = msg.range_min
-      scan = msg.ranges
-      print(scan[1])
-    except:
-      pass
-  #range_min = msg.range_min
-  #scan = msg.ranges 
-
-  #print(scan[1]) 
-  #print(len(scan))
-
-
-def get_scan1():
-  msg = rospy.wait_for_messeage('/scan', LaserScan, timeout=5)
-  range_min = msg.range_min
+  msg = rospy.wait_for_message('/scan', LaserScan)
   scan = msg.ranges 
-
   print(scan[1]) 
-  print(len(scan))
-
-
-
 
 def action():
   p = call(['rosrun','wall_follower','wall_follower'])
-  print("finish")
   rospy.sleep(1)
 
 if __name__ == '__main__':
@@ -105,10 +80,7 @@ if __name__ == '__main__':
    #set_model('vmegarover', 0, 0, -90)
    #get_status('vmegarover')
    #get_status('target')
-   #action()
-   #sub = rospy.Subscriber('scan', LaserScan, get_scan1)
-   #rospy.spin()
    for i in range(100):
      action()
-     get_scan1()
+     get_scan()
      get_status('vmegarover')
