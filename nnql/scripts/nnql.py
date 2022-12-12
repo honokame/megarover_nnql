@@ -77,6 +77,10 @@ def action():
   p = call(['rosrun','wall_follower','wall_follower'])
   rospy.sleep(1)
 
+def action2():
+  p = call(['rosrun','explore_lite','explore'])
+  rospy.sleep(1)
+
 if __name__ == '__main__':
    rospy.init_node('nnql') #ノードの初期化
 
@@ -92,7 +96,7 @@ if __name__ == '__main__':
    start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
    start_yaw = np.random.randint(0,361)
    goal_x, goal_y = pos_goal[np.random.randint(0, len(pos_goal))]
-   set_model('vmegarover', start_x, start_y, 0, start_yaw)
+   #set_model('vmegarover', start_x, start_y, 0, start_yaw)
    rospy.loginfo('init x:%d, y:%d, yaw:%d',start_x,start_y,start_yaw)
    #set_model('target', goal_x, goal_y, 0.01, 0)
    #set_model('vmegarover', 0, 0, -90)
@@ -100,6 +104,6 @@ if __name__ == '__main__':
    #get_status('target')
    for i in range(100):
      rospy.loginfo('%d',i)
-     action()
+     action2()
      get_scan()
      get_status('vmegarover')

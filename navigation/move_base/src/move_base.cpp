@@ -923,9 +923,7 @@ namespace move_base {
           count += 1;
           if(count == 10){
             system("rosnode kill explore");
-            //vel_pub_.shutdown();
             ros::shutdown();
-            //count = 0;
             break;
           }
           if(recovery_trigger_ == CONTROLLING_R)
