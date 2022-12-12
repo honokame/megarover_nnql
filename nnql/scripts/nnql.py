@@ -73,11 +73,11 @@ def get_scan():
   writer.writerow(scan)
   #print(scan[1])
 
-def action():
+def wall():
   p = call(['rosrun','wall_follower','wall_follower'])
   rospy.sleep(1)
 
-def action2():
+def frontier():
   p = call(['rosrun','explore_lite','explore'])
   rospy.sleep(1)
 
@@ -104,6 +104,7 @@ if __name__ == '__main__':
    #get_status('target')
    for i in range(100):
      rospy.loginfo('%d',i)
-     action2()
+     #wall()
+     frontier()
      get_scan()
      get_status('vmegarover')
