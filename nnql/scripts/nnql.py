@@ -13,6 +13,7 @@ from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
 from gazebo_msgs.msg import ModelState
 from sensor_msgs.msg import LaserScan
+from std_srvs.srv import Empty
 
 pos_start = [[2,2.2],[1,2.2],[3,2.2],[1,5.5],[7.5,4.5]]
 pos_goal = [[5,2],[7,2],[1,2],[3,5.2],[4,5.2],[8.5,5.5]]
@@ -93,18 +94,23 @@ if __name__ == '__main__':
    rospy.loginfo('create %s',scan_csv)
    #np.random.shuffle(pos)
    #x, y = pos[0] 
-   start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
-   start_yaw = np.random.randint(0,361)
-   goal_x, goal_y = pos_goal[np.random.randint(0, len(pos_goal))]
-   #set_model('vmegarover', start_x, start_y, 0, start_yaw)
-   rospy.loginfo('init x:%d, y:%d, yaw:%d',start_x,start_y,start_yaw)
+   #goal_x, goal_y = pos_goal[np.random.randint(0, len(pos_goal))]
    #set_model('target', goal_x, goal_y, 0.01, 0)
    #set_model('vmegarover', 0, 0, -90)
-   #get_status('vmegarover')
    #get_status('target')
-   for i in range(100):
-     rospy.loginfo('%d',i)
-     #wall()
-     frontier()
-     get_scan()
-     get_status('vmegarover')
+   for j in range(10):
+     p = call(['rosnode','kill','slam_gmapping'])
+     start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
+     start_yaw = np.random.randint(0,361)
+     set_model('vmegarover', start_x, start_y, 0, start_yaw)
+     rospy.loginfo('init x:%d, y:%d, yaw:%d',start_x,start_y,start_yaw)
+   
+     for i in range(100):
+       rospy.loginfo('%d',i)
+       #wall()
+       frontier()
+       get_scan()
+       get_status('vmegarover')
+     
+     f_status.write('\n')
+     f_scan.write('\n')

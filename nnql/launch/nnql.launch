@@ -39,7 +39,7 @@
  
   
   <!-- gmapping -->
-  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" args="/scan:=scan" clear_params="true">
+  <node pkg="gmapping" type="slam_gmapping" respawn="true" name="slam_gmapping" output="screen" args="/scan:=scan" clear_params="true">
     <rosparam command="load" file="$(find model)/configuration_files/gmapping.yaml"/>
     <param name="base_frame" value="base_link"/>
     <param name="odom_frame" value="odom" />
