@@ -34,7 +34,7 @@ void laser_callback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
   laser_rays = laser_msg.ranges;
   // the total number of laser rays the laser range finder has
   size_t range_size = laser_rays.size();
-  ROS_INFO_ONCE("Number of laser rays: [%zu]", range_size); // for debugging
+  //ROS_INFO_ONCE("Number of laser rays: [%zu]", range_size); // for debugging
   // variables to store closest (min) distance values on each zone
   z[0] = laser_msg.range_max;
   z[1] = laser_msg.range_max;
@@ -140,106 +140,106 @@ void drive_logic() {
 
   // logic block 1:
   if (z[0] > d && z[1] > d && z[2] > d && z[3] > d && z[4] > d) {
-    ROS_INFO("case 1: no obstacles detected");
+    //ROS_INFO("case 1: no obstacles detected");
     state = 0; // find wall: turn CW and move ahead
   } else if (z[0] > d && z[1] > d && z[2] < d && z[3] > d && z[4] > d) {
-    ROS_INFO("case 2: obstacle only in front zone");
+    //ROS_INFO("case 2: obstacle only in front zone");
     state = 1; // turn left
   } else if (z[0] > d && z[1] < d && z[2] > d && z[3] > d && z[4] > d) {
-    ROS_INFO("case 3: obstacle only in front-right zone");
+    //ROS_INFO("case 3: obstacle only in front-right zone");
     state = 1; // turn left
   } else if (z[0] > d && z[1] > d && z[2] > d && z[3] < d && z[4] > d) {
-    ROS_INFO("case 4: obstacle only in front-left zone");
+    //ROS_INFO("case 4: obstacle only in front-left zone");
     state = 0; // find wall: turn CW and move ahead
   } else if (z[0] > d && z[1] < d && z[2] < d && z[3] > d && z[4] > d) {
-    ROS_INFO("case 5: obstacle in front-right and front zone");
+    //ROS_INFO("case 5: obstacle in front-right and front zone");
     state = 1; // turn left
   } else if (z[0] > d && z[1] > d && z[2] < d && z[3] < d && z[4] > d) {
-    ROS_INFO("case 6: obstacle in front and front-left zone");
+    //ROS_INFO("case 6: obstacle in front and front-left zone");
     state = 1; // turn left
   } else if (z[0] > d && z[1] < d && z[2] < d && z[3] < d && z[4] > d) {
-    ROS_INFO("case 7: obstacle in front-right, front and front-left zone");
+    //ROS_INFO("case 7: obstacle in front-right, front and front-left zone");
     state = 1; // turn left
   } else if (z[0] > d && z[1] < d && z[2] > d && z[3] < d && z[4] > d) {
-    ROS_INFO("case 8: obstacle in front-right and front-left zone");
+    //ROS_INFO("case 8: obstacle in front-right and front-left zone");
     state = 3; // move slow straight ahead
   }
   // logic block 2:
   else if (z[0] < d && z[1] > d && z[2] > d && z[3] > d && z[4] > d) {
-    ROS_INFO("case 9:  obstacle only in right zone");
+    //ROS_INFO("case 9:  obstacle only in right zone");
     state = 2; // follow the wall: keep moving straight ahead
   } else if (z[0] < d && z[1] > d && z[2] < d && z[3] > d && z[4] > d) {
-    ROS_INFO("case 10:  obstacle in right and front zone");
+    //ROS_INFO("case 10:  obstacle in right and front zone");
     state = 1; // turn left
   } else if (z[0] < d && z[1] < d && z[2] > d && z[3] > d && z[4] > d) {
-    ROS_INFO("case 11: obstacle in right and front-right zone");
+    //ROS_INFO("case 11: obstacle in right and front-right zone");
     state = 1; // turn left
   } else if (z[0] < d && z[1] > d && z[2] > d && z[3] < d && z[4] > d) {
-    ROS_INFO("case 12: obstacle in right and front-left zone");
+    //ROS_INFO("case 12: obstacle in right and front-left zone");
     state = 3; // move slow straight ahead
   } else if (z[0] < d && z[1] < d && z[2] < d && z[3] > d && z[4] > d) {
-    ROS_INFO("case 13: obstacle in right, front-right and front zone");
+    //ROS_INFO("case 13: obstacle in right, front-right and front zone");
     state = 1; // turn left
   } else if (z[0] < d && z[1] > d && z[2] < d && z[3] < d && z[4] > d) {
-    ROS_INFO("case 14: obstacle in right, front and front-left zone");
+    //ROS_INFO("case 14: obstacle in right, front and front-left zone");
     state = 1; // turn left
   } else if (z[0] < d && z[1] < d && z[2] < d && z[3] < d && z[4] > d) {
-    ROS_INFO("case 15: obst. in right, front-right, front and front-left zone");
+    //ROS_INFO("case 15: obst. in right, front-right, front and front-left zone");
     state = 1; // turn left
   } else if (z[0] < d && z[1] < d && z[2] > d && z[3] < d && z[4] > d) {
-    ROS_INFO("case 16: obstacle in right, front-right and front-left zone");
+    //ROS_INFO("case 16: obstacle in right, front-right and front-left zone");
     state = 3; // move slow straight ahead
   }
   // logic block 3:
   else if (z[0] > d && z[1] > d && z[2] > d && z[3] > d && z[4] < d) {
-    ROS_INFO("case 17: obstacle only in left zone");
+    //ROS_INFO("case 17: obstacle only in left zone");
     state = 0; // find wall: turn CW and move ahead
   } else if (z[0] > d && z[1] > d && z[2] < d && z[3] > d && z[4] < d) {
-    ROS_INFO("case 18: obstacle in front and left zone");
+    //ROS_INFO("case 18: obstacle in front and left zone");
     state = 0; // find wall: turn CW and move ahead
   } else if (z[0] > d && z[1] < d && z[2] > d && z[3] > d && z[4] < d) {
-    ROS_INFO("case 19: obstacle in front-right and left zone");
+    //ROS_INFO("case 19: obstacle in front-right and left zone");
     state = 3; // move slow straight ahead
   } else if (z[0] > d && z[1] > d && z[2] > d && z[3] < d && z[4] < d) {
-    ROS_INFO("case 20: obstacle in front-left and left zone");
+    //ROS_INFO("case 20: obstacle in front-left and left zone");
     state = 0; // find wall: turn CW and move ahead
   } else if (z[0] > d && z[1] < d && z[2] < d && z[3] > d && z[4] < d) {
-    ROS_INFO("case 21: obstacle in front-right, front and left zone");
+    //ROS_INFO("case 21: obstacle in front-right, front and left zone");
     state = 0; // find wall: turn CW and move ahead
   } else if (z[0] > d && z[1] > d && z[2] < d && z[3] < d && z[4] < d) {
-    ROS_INFO("case 22: obstacle in front, front-left and left zone");
+    //ROS_INFO("case 22: obstacle in front, front-left and left zone");
     state = 1; // turn left
   } else if (z[0] > d && z[1] < d && z[2] < d && z[3] < d && z[4] < d) {
-    ROS_INFO("case 23: obst. in front-right, front, front-left and left zone");
+    //ROS_INFO("case 23: obst. in front-right, front, front-left and left zone");
     state = 1; // turn left
   } else if (z[0] > d && z[1] < d && z[2] > d && z[3] < d && z[4] < d) {
-    ROS_INFO("case 24: obstacle in front-right, front-left and left zone");
+    //ROS_INFO("case 24: obstacle in front-right, front-left and left zone");
     state = 3; // move slow straight ahead 
   }
   // logic block 4:
   else if (z[0] < d && z[1] > d && z[2] > d && z[3] > d && z[4] < d) {
-    ROS_INFO("case 25: obstacle in right and left zone");
+    //ROS_INFO("case 25: obstacle in right and left zone");
     state = 3; // move slow straight ahead
   } else if (z[0] < d && z[1] > d && z[2] < d && z[3] > d && z[4] < d) {
-    ROS_INFO("case 26: obstacle in right, front and left zone");
+    //ROS_INFO("case 26: obstacle in right, front and left zone");
     state = 1; // turn left
   } else if (z[0] < d && z[1] < d && z[2] > d && z[3] > d && z[4] < d) {
-    ROS_INFO("case 27: obstacle in right, front-right and left zone");
+    //ROS_INFO("case 27: obstacle in right, front-right and left zone");
     state = 1; // turn left
   } else if (z[0] < d && z[1] > d && z[2] > d && z[3] < d && z[4] < d) {
-    ROS_INFO("case 28: obstacle in right, front-left and left zone");
+    //ROS_INFO("case 28: obstacle in right, front-left and left zone");
     state = 0; // find wall: turn CW and move ahead
   } else if (z[0] < d && z[1] < d && z[2] < d && z[3] > d && z[4] < d) {
-    ROS_INFO("case 29: obstacle in right, front-right, front and left zone");
+    //ROS_INFO("case 29: obstacle in right, front-right, front and left zone");
     state = 1; // turn left
   } else if (z[0] < d && z[1] > d && z[2] < d && z[3] < d && z[4] < d) {
-    ROS_INFO("case 30: obstacle in right, front, front-left, and left zone");
+    //ROS_INFO("case 30: obstacle in right, front, front-left, and left zone");
     state = 0; // find wall: turn CW and move ahead
   } else if (z[0] < d && z[1] < d && z[2] < d && z[3] < d && z[4] < d) {
-    ROS_INFO("case 31: obst. in right, front-right, front, front-left and left zone");
+    //ROS_INFO("case 31: obst. in right, front-right, front, front-left and left zone");
     state = 4; // reverse turning left
   } else if (z[0] < d && z[1] < d && z[2] > d && z[3] < d && z[4] < d) {
-    ROS_INFO("case 32: obst. in right, front-right, front-left and left zone");
+    //ROS_INFO("case 32: obst. in right, front-right, front-left and left zone");
     state = 3; // move slow straight ahead
   } else {
     ROS_INFO("Unknown case");
@@ -261,7 +261,7 @@ int main(int argc, char **argv) {
 
   // Subscribe to the /scan topic and call the laser_callback function
   laser_subscriber = n.subscribe("/scan", 1000, laser_callback);
-  ROS_INFO_ONCE("Hello World! Follow Wall Customized Version!");
+  //ROS_INFO_ONCE("Hello World! Follow Wall Customized Version!");
   // Loop, the laser_callback function is called when new laser messages arrives
   while (ros::ok()) {
     ros::spinOnce(); // call all the callbacks waiting to be called
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
     //ROS_INFO("%d",count);
     sleep(0.01); //10
     if(count == 10000){
-      ROS_INFO("finish");
+      //ROS_INFO("finish");
       ros::shutdown();
       //break;
     }
