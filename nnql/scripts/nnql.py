@@ -15,7 +15,7 @@ from gazebo_msgs.msg import ModelState
 from sensor_msgs.msg import LaserScan
 from std_srvs.srv import Empty
 
-pos_start = [[2,2.2],[1,2.2],[3,2.2],[1,5.5],[7.5,4.5]]
+pos_start = [[0.5,2.3],[1.5,2.5],[4.2,2.5],[5.5,2.3],[6.5,2.2],[7.5,4.5],[8.5,5.7],[4.3,5.3]]
 pos_goal = [[5,2],[7,2],[1,2],[3,5.2],[4,5.2],[8.5,5.5]]
 
 def set_model(name, x, y, z, yaw): #指定位置にセット
@@ -72,7 +72,6 @@ def get_scan():
   scan = msg.ranges
   writer = csv.writer(f_scan)
   writer.writerow(scan)
-  #print(scan[1])
 
 def wall():
   p = call(['rosrun','wall_follower','wall_follower'])
@@ -86,8 +85,8 @@ if __name__ == '__main__':
    rospy.init_node('nnql') #ノードの初期化
 
    args = sys.argv #引数
-   status_csv = 'status_' + args[1] + '.csv'
-   scan_csv = 'scan_' + args[1] + '.csv'
+   status_csv = 'status' + args[1] + '.csv'
+   scan_csv = 'scan' + args[1] + '.csv'
    f_status = open(status_csv,'w')
    rospy.loginfo('create %s',status_csv)
    f_scan = open(scan_csv,'w')
@@ -103,12 +102,12 @@ if __name__ == '__main__':
      start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
      start_yaw = np.random.randint(0,361)
      set_model('vmegarover', start_x, start_y, 0, start_yaw)
-     rospy.loginfo('init x:%d, y:%d, yaw:%d',start_x,start_y,start_yaw)
+     rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
    
      for i in range(100):
        rospy.loginfo('%d',i)
-       #wall()
-       frontier()
+       wall()
+       #frontier()
        get_scan()
        get_status('vmegarover')
      
