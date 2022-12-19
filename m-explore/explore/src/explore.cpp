@@ -63,7 +63,7 @@ Explore::Explore()
   private_nh_.param("planner_frequency", planner_frequency_, 1.0); //1.0
   private_nh_.param("progress_timeout", timeout, 30.0); //30.0
   progress_timeout_ = ros::Duration(timeout);
-  private_nh_.param("visualize", visualize_, true); //false
+  private_nh_.param("visualize", visualize_, false); //false
   private_nh_.param("potential_scale", potential_scale_, 3.0); //1e-3
   private_nh_.param("orientation_scale", orientation_scale_, 0.0);
   private_nh_.param("gain_scale", gain_scale_, 1.0);
@@ -78,9 +78,9 @@ Explore::Explore()
         private_nh_.advertise<visualization_msgs::MarkerArray>("frontiers", 10);
   }
 
-  ROS_INFO("Waiting to connect to move_base server");
+  //ROS_INFO("Waiting to connect to move_base server");
   move_base_client_.waitForServer();
-  ROS_INFO("Connected to move_base server");
+  //ROS_INFO("Connected to move_base server");
 
   exploring_timer_ =
       relative_nh_.createTimer(ros::Duration(1. / planner_frequency_),
@@ -111,7 +111,7 @@ void Explore::visualizeFrontiers(
   green.b = 0;
   green.a = 1.0;
 
-  ROS_DEBUG("visualising %lu frontiers", frontiers.size());
+  //ROS_DEBUG("visualising %lu frontiers", frontiers.size());
   visualization_msgs::MarkerArray markers_msg;
   std::vector<visualization_msgs::Marker>& markers = markers_msg.markers;
   visualization_msgs::Marker m;
@@ -183,11 +183,12 @@ void Explore::makePlan()
   // get frontiers sorted according to cost
   auto frontiers = search_.searchFrom(pose.position);
   ROS_DEBUG("found %lu frontiers", frontiers.size());
-  for (size_t i = 0; i < frontiers.size(); ++i) {
-    ROS_DEBUG("frontier %zd cost: %f", i, frontiers[i].cost);
-  }
+  //for (size_t i = 0; i < frontiers.size(); ++i) {
+  //  ROS_DEBUG("frontier %zd cost: %f", i, frontiers[i].cost);
+  //}
 
   if (frontiers.empty()) {
+    ROS_DEBUG("frontier is empty");
     stop();
     return;
   }
@@ -204,6 +205,7 @@ void Explore::makePlan()
                          return goalOnBlacklist(f.centroid);
                        });
   if (frontier == frontiers.end()) {
+    ROS_DEBUG("frontier is end");
     stop();
     return;
   }
@@ -290,6 +292,8 @@ void Explore::stop()
   move_base_client_.cancelAllGoals();
   exploring_timer_.stop();
   ROS_INFO("Exploration stopped.");
+  system("rosnode kill move_base");
+  ros::shutdown();
 }
 
 }  // namespace explore

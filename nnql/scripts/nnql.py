@@ -97,17 +97,18 @@ if __name__ == '__main__':
    #set_model('target', goal_x, goal_y, 0.01, 0)
    #set_model('vmegarover', 0, 0, -90)
    #get_status('target')
-   for j in range(10):
+   for j in range(50):
      p = call(['rosnode','kill','slam_gmapping'])
      start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
      start_yaw = np.random.randint(0,361)
      set_model('vmegarover', start_x, start_y, 0, start_yaw)
      rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
-   
-     for i in range(100):
+     get_scan()
+     get_model('vmegarover')
+     for i in range(19):
        rospy.loginfo('%d',i)
-       wall()
-       #frontier()
+       #wall()
+       frontier()
        get_scan()
        get_status('vmegarover')
      
