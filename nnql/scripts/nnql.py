@@ -104,7 +104,7 @@ if __name__ == '__main__':
      set_model('vmegarover', start_x, start_y, 0, start_yaw)
      rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
      get_scan()
-     get_model('vmegarover')
+     get_status('vmegarover')
      for i in range(19):
        rospy.loginfo('%d',i)
        #wall()
