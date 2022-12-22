@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/chinourobot/okuguchi/catkin_pcm/src/mrpt_bridge/build/devel/setup.sh

@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: mrpt_bridge
+Description: Description of mrpt_bridge
+Version: 0.1.25
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -lmrpt_bridge
+Requires: geometry_msgs marker_msgs message_runtime mrpt_msgs nav_msgs sensor_msgs std_msgs stereo_msgs
