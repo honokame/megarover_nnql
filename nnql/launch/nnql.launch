@@ -16,7 +16,7 @@
   <!-- load the urdf into the ros parameter server -->
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)'" />
   <param name="target_sdf" textfile="$(find world)/models/checkerboard_plane/checkerboard_plane.sdf"/>
-  <node name="mega_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model vmegarover -param robot_description -x 2 -y 2.3 -z 0 -R 0 -P 0 -Y 0 "/>
+  <node name="mega_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model vmegarover -param robot_description -x 1 -y 2.3 -z 0 -R 0 -P 0 -Y 0 "/>
   <node name="target_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model target -param target_sdf -x 5 -y 2 -z 0.01 -R 0 -P 0 -Y 0"/>
   
   <!-- key control -->
