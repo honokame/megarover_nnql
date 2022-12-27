@@ -920,12 +920,12 @@ namespace move_base {
           last_valid_control_ = ros::Time::now();
           //make sure that we send the velocity command to the base
           vel_pub_.publish(cmd_vel);
-          count += 1;
+          /*count += 1;
           if(count == 10){
             system("rosnode kill explore");
             ros::shutdown();
             break;
-          }
+          }*/
           if(recovery_trigger_ == CONTROLLING_R)
             recovery_index_ = 0;
         }
