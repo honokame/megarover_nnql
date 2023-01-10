@@ -8,7 +8,7 @@
     <arg name="world_name" value="$(find world)/worlds/room.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="false"/>
+    <arg name="gui" value="true"/>
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>
@@ -20,7 +20,7 @@
   <node name="target_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model target -param target_sdf -x 5 -y 2 -z 0.01 -R 0 -P 0 -Y 0"/>
   
   <!-- key control -->
-  <!--<include file="$(find megarover_samples)/launch/keycontrol.launch"/>-->
+  <!--include file="$(find model)/launch/keycontrol.launch"/-->
 
   <!-- controll -->
   <include file="$(find megarover_samples)/launch/vmegarover_control.launch"/>
