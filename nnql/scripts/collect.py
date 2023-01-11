@@ -8,6 +8,7 @@ import tf
 import sys #引数
 import os #ファイル読み書き
 import csv #リストをcsvに書き込み
+import message_filters
 from subprocess import *
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
@@ -69,15 +70,15 @@ def get_status(name):
   #f_status.write(status)
 
 def callback_scan(msg):
-  #msg = rospy.wait_for_message('/scan', LaserScan)
-  scan = msg.ranges
   time = msg.header.stamp
-  rospy.loginfo('scan')
+  scan = msg.ranges
+  f_scan.write(str(time)) 
   writer = csv.writer(f_scan)
   writer.writerow(scan)
 
 def callback_odom(msg):
   # global odom_x, odom_y, odom_theta
+  time = msg.header.stamp
   odom_x = msg.pose.pose.position.x + 0.5
   odom_y = msg.pose.pose.position.y + 2.3
   qx = msg.pose.pose.orientation.x
@@ -87,18 +88,44 @@ def callback_odom(msg):
   eular = tf.transformations.euler_from_quaternion((qx, qy, qz, qw))
   odom_theta = round(eular[2]*180/np.pi)
   rospy.loginfo('odom_x:%d, odom_y:%d, odom_theta:%d',int(odom_x),int(odom_y),int(odom_theta))
-  #status = str(int(x)) + ',' + str(int(y)) + ',' + str(int(yaw)) + '\n'
-  #f_status.write(status)
+  status = str(time) + ',' + str(int(odom_x)) + ',' + str(int(odom_y)) + ',' + str(int(odom_theta)) + '\n'
+  f_status.write(status)
+
+def callback(msg1, msg2):
+  time1 = msg1.header.stamp
+  scan = msg1.ranges
+  f_scan.write(str(time1)) 
+  writer = csv.writer(f_scan)
+  writer.writerow(scan)
+  #f_scan.write('\n') 
+  time2 = msg2.header.stamp
+  odom_x = msg2.pose.pose.position.x + 0.5
+  odom_y = msg2.pose.pose.position.y + 2.3
+  qx = msg2.pose.pose.orientation.x
+  qy = msg2.pose.pose.orientation.y 
+  qz = msg2.pose.pose.orientation.z
+  qw = msg2.pose.pose.orientation.w
+  eular = tf.transformations.euler_from_quaternion((qx, qy, qz, qw))
+  odom_theta = round(eular[2]*180/np.pi)
+  rospy.loginfo(str(time1))
+  rospy.loginfo(str(time2))
+  #rospy.loginfo('odom_x:%d, odom_y:%d, odom_theta:%d',int(odom_x),int(odom_y),int(odom_theta))
+  status = str(time2) + ',' + str(int(odom_x)) + ',' + str(int(odom_y)) + ',' + str(int(odom_theta)) + '\n'
+  f_status.write(status)
+  #f_status.write('\n')
 
 def odometry():
-  # rospy.init_node('collect')
-  odom_subscriber = rospy.Subscriber('/odom', Odometry, callback_odom)
-  scan_subscriber = rospy.Subscriber('/scan', LaserScan, callback_scan)
- # get_status('vmegarover')
+  rospy.init_node('collect')
+  #scan_subscriber = rospy.Subscriber('/scan', LaserScan, callback_scan)
+  #odom_subscriber = rospy.Subscriber('/odom', Odometry, callback_odom)
+  scan_subscriber = message_filters.Subscriber('/scan', LaserScan)
+  odom_subscriber = message_filters.Subscriber('/odom', Odometry)
+  mf = message_filters.ApproximateTimeSynchronizer([scan_subscriber, odom_subscriber], 10, 0.01)
+  mf.registerCallback(callback)
   rospy.spin()
 
 if __name__ == '__main__':
-   rospy.init_node('collect') #ノードの初期化
+  # rospy.init_node('collect') #ノードの初期化
    args = sys.argv #引数
    status_csv = 'status' + args[1] + '.csv'
    scan_csv = 'scan' + args[1] + '.csv'
@@ -108,8 +135,7 @@ if __name__ == '__main__':
    rospy.loginfo('create %s',scan_csv)
    p = call(['rosnode','kill','slam_gmapping'])
    set_model('vmegarover', 0.5, 2.3, 0, 0)
-   get_status('vmegarover')
    odometry()
 
-   f_status.write('\n')
-   f_scan.write('\n')
+  # f_status.write('\n')
+  # f_scan.write('\n')
