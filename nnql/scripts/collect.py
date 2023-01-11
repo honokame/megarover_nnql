@@ -68,9 +68,11 @@ def get_status(name):
   #status = str(int(x)) + ',' + str(int(y)) + ',' + str(int(yaw)) + '\n'
   #f_status.write(status)
 
-def get_scan():
-  msg = rospy.wait_for_message('/scan', LaserScan)
+def callback_scan(msg):
+  #msg = rospy.wait_for_message('/scan', LaserScan)
   scan = msg.ranges
+  time = msg.header.stamp
+  rospy.loginfo('scan')
   writer = csv.writer(f_scan)
   writer.writerow(scan)
 
@@ -91,7 +93,8 @@ def callback_odom(msg):
 def odometry():
   # rospy.init_node('collect')
   odom_subscriber = rospy.Subscriber('/odom', Odometry, callback_odom)
-  get_status('vmegarover')
+  scan_subscriber = rospy.Subscriber('/scan', LaserScan, callback_scan)
+ # get_status('vmegarover')
   rospy.spin()
 
 if __name__ == '__main__':
