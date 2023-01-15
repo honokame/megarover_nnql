@@ -17,6 +17,7 @@ from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Quaternion
 from std_srvs.srv import Empty
+from nav_msgs.msg import OccupancyGrid
 
 
 pos_start = [[0.5,2.3],[1.5,2.5],[4.2,2.5],[5.5,2.3],[6.5,2.2],[7.5,4.5],[8.5,5.7],[4.3,5.3]]
@@ -80,7 +81,7 @@ def callback_odom(msg):
   # global odom_x, odom_y, odom_theta
   time = msg.header.stamp
   odom_x = msg.pose.pose.position.x + 0.5
-  odom_y = msg.pose.pose.position.y + 2.3
+  odom_y = msg.pose.pose.position.y + 2.3 #2.3
   qx = msg.pose.pose.orientation.x
   qy = msg.pose.pose.orientation.y 
   qz = msg.pose.pose.orientation.z
@@ -91,6 +92,14 @@ def callback_odom(msg):
   status = str(time) + ',' + str(int(odom_x)) + ',' + str(int(odom_y)) + ',' + str(int(odom_theta)) + '\n'
   f_status.write(status)
 
+def callback_map(msg):
+  mapdata = msg.data
+  time = msg.header.stamp
+  rospy.loginfo('size:%d, unknow:%d, know:%d',len(mapdata),mapdata.count(-1),mapdata.count(100))
+  map_status = str(time) + ',' + str(mapdata.count(-1)) + ',' + str(mapdata.count(100)) + '\n'
+  f_map.write(map_status)
+  
+
 def callback(msg1, msg2):
   time1 = msg1.header.stamp
   scan = msg1.ranges
@@ -99,25 +108,30 @@ def callback(msg1, msg2):
   writer.writerow(scan)
   #f_scan.write('\n') 
   time2 = msg2.header.stamp
-  odom_x = msg2.pose.pose.position.x + 0.5
-  odom_y = msg2.pose.pose.position.y + 2.3
+  odom_x = msg2.pose.pose.position.x + 2.59
+  odom_y = msg2.pose.pose.position.y + 5.23 #2.3
   qx = msg2.pose.pose.orientation.x
   qy = msg2.pose.pose.orientation.y 
   qz = msg2.pose.pose.orientation.z
   qw = msg2.pose.pose.orientation.w
   eular = tf.transformations.euler_from_quaternion((qx, qy, qz, qw))
-  odom_theta = round(eular[2]*180/np.pi)
-  rospy.loginfo(str(time1))
-  rospy.loginfo(str(time2))
-  #rospy.loginfo('odom_x:%d, odom_y:%d, odom_theta:%d',int(odom_x),int(odom_y),int(odom_theta))
+  odom_theta = round(eular[2]*180/np.pi)  
+  if(odom_theta < 0):
+    odom_theta = odom_theta + 360
+ # odom_theta = odom_theta + 90
+ 
+  #rospy.loginfo(str(time1))
+  #rospy.loginfo(str(time2))
+  rospy.loginfo('odom_x:%d, odom_y:%d, odom_theta:%d',int(odom_x),int(odom_y),int(odom_theta))
   status = str(time2) + ',' + str(int(odom_x)) + ',' + str(int(odom_y)) + ',' + str(int(odom_theta)) + '\n'
   f_status.write(status)
   #f_status.write('\n')
 
 def odometry():
-  rospy.init_node('collect')
+  # rospy.init_node('collect')
   #scan_subscriber = rospy.Subscriber('/scan', LaserScan, callback_scan)
   #odom_subscriber = rospy.Subscriber('/odom', Odometry, callback_odom)
+  map_subscriber = rospy.Subscriber('/map', OccupancyGrid, callback_map)
   scan_subscriber = message_filters.Subscriber('/scan', LaserScan)
   odom_subscriber = message_filters.Subscriber('/odom', Odometry)
   mf = message_filters.ApproximateTimeSynchronizer([scan_subscriber, odom_subscriber], 10, 0.01)
@@ -125,16 +139,18 @@ def odometry():
   rospy.spin()
 
 if __name__ == '__main__':
-  # rospy.init_node('collect') #ノードの初期化
+   rospy.init_node('collect') #ノードの初期化
    args = sys.argv #引数
    status_csv = 'status' + args[1] + '.csv'
    scan_csv = 'scan' + args[1] + '.csv'
+   map_csv = 'map' + args[1] + '.csv'
    f_status = open(status_csv,'w')
    rospy.loginfo('create %s',status_csv)
    f_scan = open(scan_csv,'w')
    rospy.loginfo('create %s',scan_csv)
-   p = call(['rosnode','kill','slam_gmapping'])
-   set_model('vmegarover', 0.5, 2.3, 0, 0)
+   f_map = open(map_csv,'w')
+   #p = call(['rosnode','kill','slam_gmapping'])
+   set_model('vmegarover', 6.6, 2.1, 0, 180)
    odometry()
 
   # f_status.write('\n')
