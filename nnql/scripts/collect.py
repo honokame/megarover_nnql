@@ -18,8 +18,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Quaternion
 from std_srvs.srv import Empty
 from nav_msgs.msg import OccupancyGrid
-
-
+import commands
 pos_start = [[0.5,2.3],[1.5,2.5],[4.2,2.5],[5.5,2.3],[6.5,2.2],[7.5,4.5],[8.5,5.7],[4.3,5.3]]
 odom_x , odom_y, odom_theta = 0.5, 2.3, 0.0
 
@@ -136,8 +135,8 @@ def odometry():
   odom_subscriber = message_filters.Subscriber('/odom', Odometry)
   mf = message_filters.ApproximateTimeSynchronizer([scan_subscriber, odom_subscriber], 10, 0.01)
   mf.registerCallback(callback)
-  for i in range(10000):
-    get_status('vmegarover')
+ # for i in range(10000):
+ #   get_status('vmegarover')
   rospy.spin()
 
 if __name__ == '__main__':
@@ -153,6 +152,9 @@ if __name__ == '__main__':
    f_map = open(map_csv,'w')
    p = call(['rosnode','kill','slam_gmapping'])
    set_model('vmegarover', 6.6, 2.1, 0, 180)
+   #print('g.py呼び出し')
+   #os.system('python3 g.py')
+   #print('g.pyプログラム終了')
    odometry()
   # f_status.write('\n')
   # f_scan.write('\n')
