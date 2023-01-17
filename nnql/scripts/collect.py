@@ -122,7 +122,7 @@ def callback(msg1, msg2):
  
   #rospy.loginfo(str(time1))
   #rospy.loginfo(str(time2))
-  rospy.loginfo('odom_x:%d, odom_y:%d, odom_theta:%d',int(odom_x),int(odom_y),int(odom_theta))
+  #rospy.loginfo('odom_x:%d, odom_y:%d, odom_theta:%d',int(odom_x),int(odom_y),int(odom_theta))
   status = str(time2) + ',' + str(int(odom_x)) + ',' + str(int(odom_y)) + ',' + str(int(odom_theta)) + '\n'
   f_status.write(status)
   #f_status.write('\n')
@@ -136,6 +136,8 @@ def odometry():
   odom_subscriber = message_filters.Subscriber('/odom', Odometry)
   mf = message_filters.ApproximateTimeSynchronizer([scan_subscriber, odom_subscriber], 10, 0.01)
   mf.registerCallback(callback)
+  for i in range(10000):
+    get_status('vmegarover')
   rospy.spin()
 
 if __name__ == '__main__':
@@ -149,9 +151,8 @@ if __name__ == '__main__':
    f_scan = open(scan_csv,'w')
    rospy.loginfo('create %s',scan_csv)
    f_map = open(map_csv,'w')
-   #p = call(['rosnode','kill','slam_gmapping'])
+   p = call(['rosnode','kill','slam_gmapping'])
    set_model('vmegarover', 6.6, 2.1, 0, 180)
    odometry()
-
   # f_status.write('\n')
   # f_scan.write('\n')
