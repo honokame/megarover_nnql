@@ -100,32 +100,32 @@ void robot_move(geometry_msgs::Twist &motor_command) {
   switch (state) {
     case 0:
       // Find a wall: turn CW (right) while moving ahead
-      motor_command.linear.x = 0.2; //0.15
-      motor_command.angular.z = -0.2; //0.15
+      motor_command.linear.x = 0.3; //0.15
+      motor_command.angular.z = -0.3; //0.15
       break;
 
     case 1:
       // Turn left
       motor_command.linear.x = 0.0;
-      motor_command.angular.z = 0.2;
+      motor_command.angular.z = 0.5;
       break;
 
     case 2:
       // Follow the wall: keep moving straight ahead
       motor_command.angular.z = 0.0;
-      motor_command.linear.x = 0.25; //0.15
+      motor_command.linear.x = 0.5; //0.15
       break;
 
     case 3:
       // Move slow straight ahead
-      motor_command.linear.x = 0.15; //0.10
+      motor_command.linear.x = 0.3; //0.10
       motor_command.angular.z = 0.0;
       break;
 
     case 4:
       // Reverse turning left
-      motor_command.linear.x = -0.2; //-0.5
-      motor_command.angular.z = 0.2; // pos. value equals turning C
+      motor_command.linear.x = -0.3; //-0.5
+      motor_command.angular.z = 0.3; // pos. value equals turning C
       break;
   }
 }
@@ -257,7 +257,7 @@ int main(int argc, char **argv) {
   // Inform ROS master that we will be publishing a message of type
   // geometry_msgs::Twist on the robot actuation topic with a publishing queue
   // size of 100
-  motor_command_publisher = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
+  motor_command_publisher = n.advertise<geometry_msgs::Twist>("/cmd_vel", 100);
 
   // Subscribe to the /scan topic and call the laser_callback function
   laser_subscriber = n.subscribe("/scan", 1000, laser_callback);
@@ -275,8 +275,8 @@ int main(int argc, char **argv) {
     count += 1;
     //ROS_INFO("%d",count);
     sleep(0.01); //10
-    if(count == 10000){
-      //ROS_INFO("finish");
+    if(count == 500000){
+      ROS_INFO("finish");
       ros::shutdown();
       //break;
     }

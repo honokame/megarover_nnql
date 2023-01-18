@@ -77,7 +77,7 @@ def get_scan():
   writer.writerow(scan)
 
 def wall():
-  p = call(['rosrun','wall_follower','wall_follower'])
+  p = call(['rosrun','wall_follower','follow_wall.py'])
   rospy.sleep(1)
 
 def frontier():
@@ -129,9 +129,9 @@ if __name__ == '__main__':
    #  get_status('vmegarover')
      for i in range(19):
    #    rospy.loginfo('%d',i)
-      # wall()
+       wall()
       # frontier()
-       random()
+       #random()
        #get_scan()
        #get_status('vmegarover')
      
