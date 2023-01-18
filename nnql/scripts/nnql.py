@@ -14,6 +14,9 @@ from gazebo_msgs.srv import GetModelState
 from gazebo_msgs.msg import ModelState
 from sensor_msgs.msg import LaserScan
 from std_srvs.srv import Empty
+import actionlib
+from actionlib_msgs.msg import *
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 pos_start = [[0.5,2.3],[1.5,2.5],[4.2,2.5],[5.5,2.3],[6.5,2.2],[7.5,4.5],[8.5,5.7],[4.3,5.3]]
 pos_goal = [[5,2],[7,2],[1,2],[3,5.2],[4,5.2],[8.5,5.5]]
@@ -81,6 +84,24 @@ def frontier():
   p = call(['rosrun','explore_lite','explore'])
   rospy.sleep(1)
 
+def random():
+   ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+   while not ac.wait_for_server(rospy.Duration(5)):
+     rospy.loginfo('wait server')
+   goal = MoveBaseGoal()
+   goal.target_pose.header.frame_id = 'map'
+   goal.target_pose.header.stamp = rospy.Time.now()
+   goal.target_pose.pose.position.x = np.random.randint(0,8)*np.random.rand()
+   goal.target_pose.pose.position.y = np.random.randint(0,5)*np.random.rand()
+   yaw = np.random.randint(0,361)
+   goal.target_pose.pose.orientation.x = 0
+   goal.target_pose.pose.orientation.y = 0
+   goal.target_pose.pose.orientation.z = np.sin((yaw*np.pi/180) / 2)
+   goal.target_pose.pose.orientation.w = np.cos((yaw*np.pi/180) / 2)
+   ac.send_goal(goal) 
+   rospy.sleep(10)
+   p = call(['rosnode','kill','move_base'])
+
 if __name__ == '__main__':
    rospy.init_node('nnql') #ノードの初期化
 
@@ -97,20 +118,22 @@ if __name__ == '__main__':
    #set_model('target', goal_x, goal_y, 0.01, 0)
    #set_model('vmegarover', 0, 0, -90)
    #get_status('target')
+  # random()
    for j in range(50):
      p = call(['rosnode','kill','slam_gmapping'])
      start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
      start_yaw = np.random.randint(0,361)
      set_model('vmegarover', start_x, start_y, 0, start_yaw)
      rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
-     get_scan()
-     get_status('vmegarover')
+   #  get_scan()
+   #  get_status('vmegarover')
      for i in range(19):
-       rospy.loginfo('%d',i)
-       #wall()
-       frontier()
-       get_scan()
-       get_status('vmegarover')
+   #    rospy.loginfo('%d',i)
+      # wall()
+      # frontier()
+       random()
+       #get_scan()
+       #get_status('vmegarover')
      
-     f_status.write('\n')
-     f_scan.write('\n')
+     #f_status.write('\n')
+     #f_scan.write('\n')
