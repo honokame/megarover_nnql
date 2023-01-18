@@ -54,7 +54,6 @@
     <rosparam file="$(find model)/configuration_files/dwa_local_planner_params.yaml" command="load" />
     <rosparam file="$(find model)/configuration_files/move_base_params.yaml" command="load" />
 
-    <param name="base_global_planner" value="rrtstar_planner/RRT"/>
     <param name="global_costmap/global_frame" value="map" />
     <param name="global_costmap/robot_base_frame" value="base_link" />
     <param name="local_costmap/laser_scan_sensor/sensor_frame" value="laser_link" /><!--lrf_link?-->
