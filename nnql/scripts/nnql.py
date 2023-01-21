@@ -19,7 +19,6 @@ from actionlib_msgs.msg import *
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 pos_start = [[0.5,2.3],[1.5,2.5],[4.2,2.5],[5.5,2.3],[6.5,2.2],[7.5,4.5],[8.5,5.7],[4.3,5.3]]
-pos_goal = [[5,2],[7,2],[1,2],[3,5.2],[4,5.2],[8.5,5.5]]
 
 def set_model(name, x, y, z, yaw): #指定位置にセット
   model_state = ModelState()
@@ -37,7 +36,7 @@ def set_model(name, x, y, z, yaw): #指定位置にセット
   model_state.twist.angular.x = 0
   model_state.twist.angular.y = 0
   model_state.twist.angular.z = 0
-  
+
   rospy.wait_for_service('/gazebo/set_model_state')
   try:
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
@@ -73,8 +72,9 @@ def get_status(name):
 def get_scan():
   msg = rospy.wait_for_message('/scan', LaserScan)
   scan = msg.ranges
-  writer = csv.writer(f_scan)
-  writer.writerow(scan)
+  #writer = csv.writer(f_scan)
+  #writer.writerow(scan)
+  return scan
 
 def wall():
   p = call(['rosrun','wall_follower','follow_wall.py'])
@@ -85,55 +85,50 @@ def frontier():
   rospy.sleep(1)
 
 def random():
-   ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-   while not ac.wait_for_server(rospy.Duration(5)):
-     rospy.loginfo('wait server')
-   goal = MoveBaseGoal()
-   goal.target_pose.header.frame_id = 'map'
-   goal.target_pose.header.stamp = rospy.Time.now()
-   goal.target_pose.pose.position.x = np.random.randint(0,8)*np.random.rand()
-   goal.target_pose.pose.position.y = np.random.randint(0,5)*np.random.rand()
-   yaw = np.random.randint(0,361)
-   goal.target_pose.pose.orientation.x = 0
-   goal.target_pose.pose.orientation.y = 0
-   goal.target_pose.pose.orientation.z = np.sin((yaw*np.pi/180) / 2)
-   goal.target_pose.pose.orientation.w = np.cos((yaw*np.pi/180) / 2)
-   ac.send_goal(goal) 
-   rospy.sleep(10)
-   p = call(['rosnode','kill','move_base'])
+  ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+  while not ac.wait_for_server(rospy.Duration(5)):
+    rospy.loginfo('wait server')
+  goal = MoveBaseGoal()
+  goal.target_pose.header.frame_id = 'map'
+  goal.target_pose.header.stamp = rospy.Time.now()
+  goal.target_pose.pose.position.x = np.random.randint(0,8)*np.random.rand()
+  goal.target_pose.pose.position.y = np.random.randint(0,5)*np.random.rand()
+  yaw = np.random.randint(0,361)
+  goal.target_pose.pose.orientation.x = 0
+  goal.target_pose.pose.orientation.y = 0
+  goal.target_pose.pose.orientation.z = np.sin((yaw*np.pi/180) / 2)
+  goal.target_pose.pose.orientation.w = np.cos((yaw*np.pi/180) / 2)
+  ac.send_goal(goal) 
+  rospy.sleep(10)
+  p = call(['rosnode','kill','move_base'])
 
 if __name__ == '__main__':
-   rospy.init_node('nnql') #ノードの初期化
+  rospy.init_node('nnql') #ノードの初期化
 
-   args = sys.argv #引数
-   status_csv = 'status' + args[1] + '.csv'
-   scan_csv = 'scan' + args[1] + '.csv'
-   f_status = open(status_csv,'w')
-   rospy.loginfo('create %s',status_csv)
-   f_scan = open(scan_csv,'w')
-   rospy.loginfo('create %s',scan_csv)
-   #np.random.shuffle(pos)
-   #x, y = pos[0] 
-   #goal_x, goal_y = pos_goal[np.random.randint(0, len(pos_goal))]
-   #set_model('target', goal_x, goal_y, 0.01, 0)
-   #set_model('vmegarover', 0, 0, -90)
-   #get_status('target')
-  # random()
-   for j in range(50):
-     p = call(['rosnode','kill','slam_gmapping'])
-     start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
-     start_yaw = np.random.randint(0,361)
-     set_model('vmegarover', start_x, start_y, 0, start_yaw)
-     rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
-   #  get_scan()
-   #  get_status('vmegarover')
-     for i in range(19):
-   #    rospy.loginfo('%d',i)
-       wall()
-      # frontier()
-       #random()
-       #get_scan()
-       #get_status('vmegarover')
-     
-     #f_status.write('\n')
-     #f_scan.write('\n')
+  args = sys.argv #引数
+  status_csv = 'status' + args[1] + '.csv'
+  scan_csv = 'scan' + args[1] + '.csv'
+  f_status = open(status_csv,'w')
+  f_scan = open(scan_csv,'w')
+  action_list = ["frontier", "wall", "random"]
+  for j in range(10):
+    p = call(['rosnode','kill','slam_gmapping'])
+    start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
+    start_yaw = np.random.randint(0, 361)
+    set_model('vmegarover', start_x, start_y, 0, start_yaw)
+    rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
+    scan = get_scan()
+    get_status('vmegarover')
+    for i in range(4):
+      rospy.loginfo('%dstep',i)
+      action_index = np.random.randint(0, 2)
+      action = action_list[action_index]
+      if action == "frontier":
+        frontier()
+      elif action == "wall":
+        wall()
+      elif action == "random":
+        random()
+
+      scan = get_scan()
+      get_status('vmegarover')
