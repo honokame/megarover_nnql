@@ -5,7 +5,7 @@ import sys
 
 
 path = 'data/'
-feature_file = path + 'feature' + sys.argv[1] + '.csv'
+feature_file = path + 'r9t12/feature' + sys.argv[1] + '.csv'
 statusclass_file = path + 'statusclass' + sys.argv[1] + '_26.csv'
 scan = pd.read_csv(feature_file, header=None)
 status = pd.read_csv(statusclass_file, header=None)
@@ -14,8 +14,8 @@ print(len_data)
 status = status.append(status[0:50])
 scan = scan.append(scan[0:50])
 
-new_scan = path + 'train' + sys.argv[1] + '_feature.csv'
-new_status = path + 'train' + sys.argv[1] + '_statusclass.csv'
+new_scan = path + 'r5t8/train' + sys.argv[1] + '_feature.csv'
+new_status = path + 'r5t8/train' + sys.argv[1] + '_statusclass.csv'
 no_file = path + 'no' + sys.argv[1] + '.txt'
 nofile = open(no_file, 'w')
 
