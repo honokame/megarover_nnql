@@ -102,6 +102,8 @@ def shapecontext(scan):
         feature.append(area.count(c+1)-1)
       else:
         feature.append(area.count(c+1))
+  
+  f_file.write(str(100)+',')
   writer = csv.writer(f_file)
   writer.writerow(feature)
   #print(feature)
