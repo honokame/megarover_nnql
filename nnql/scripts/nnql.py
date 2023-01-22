@@ -103,6 +103,13 @@ def random():
   rospy.sleep(10)
   p = call(['rosnode','kill','move_base'])
 
+def get_rrf(scan):
+  feature.shapecontext(scan)
+  os.system('python3 gcntest.py')
+  state = np.loadtxt(fname="temp_rrf.csv", dtype="float", delimiter=",")
+  rrf = state.tolist()
+  return rrf
+
 if __name__ == '__main__':
   rospy.init_node('nnql') #ノードの初期化
 
@@ -120,15 +127,12 @@ if __name__ == '__main__':
     rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
     get_status('vmegarover')
     scan = get_scan()
-    feature.shapecontext(scan)
-    os.system('python3 gcntest.py')
-    state = np.loadtxt(fname="temp_rrf.csv", dtype="float", delimiter=",")
-    now_state = state.tolist()
+    now_state = get_rrf(scan)
     print(now_state)
     for i in range(4):
       rospy.loginfo('%dstep',i)
       action_index = np.random.randint(0, 3)
-      action_index = 0
+      #action_index = 0
       action = action_list[action_index]
       if action == "frontier":
         frontier()
@@ -139,5 +143,4 @@ if __name__ == '__main__':
       
       get_status('vmegarover')
       scan = get_scan()
-      feature.shapecontext(scan)
-      os.system('python3 gcntest.py')
+      now_state = get_rrf(scan)
