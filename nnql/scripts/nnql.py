@@ -14,10 +14,11 @@ from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
 from gazebo_msgs.msg import ModelState
 from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import OccupancyGrid
 from std_srvs.srv import Empty
-import actionlib
-from actionlib_msgs.msg import *
-from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+import actionlib #random()
+from actionlib_msgs.msg import * #random()
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal #random()
 
 pos_start = [[0.5,2.3],[1.5,2.5],[4.2,2.5],[5.5,2.3],[6.5,2.2],[7.5,4.5],[8.5,5.7],[4.3,5.3]]
 
@@ -102,6 +103,7 @@ def random():
   ac.send_goal(goal) 
   rospy.sleep(10)
   p = call(['rosnode','kill','move_base'])
+  rospy.sleep(1)
 
 def get_rrf(scan):
   feature.shapecontext(scan)
@@ -109,6 +111,13 @@ def get_rrf(scan):
   state = np.loadtxt(fname="temp_rrf.csv", dtype="float", delimiter=",")
   rrf = state.tolist()
   return rrf
+
+def get_occupancy():
+  msg = rospy.wait_for_message('map', OccupancyGrid)
+  mapdata = msg.data
+  occupancy = len(mapdata) - mapdata.count(-1)
+  rospy.loginfo('occupancy cell:%d',occupancy)
+  return occupancy
 
 if __name__ == '__main__':
   rospy.init_node('nnql') #ノードの初期化
@@ -128,12 +137,14 @@ if __name__ == '__main__':
     get_status('vmegarover')
     scan = get_scan()
     now_state = get_rrf(scan)
+    get_occupancy()
     print(now_state)
     for i in range(4):
       rospy.loginfo('%dstep',i)
       action_index = np.random.randint(0, 3)
       #action_index = 0
       action = action_list[action_index]
+      rospy.loginfo('action:%s',action)
       if action == "frontier":
         frontier()
       elif action == "wall":
@@ -144,3 +155,5 @@ if __name__ == '__main__':
       get_status('vmegarover')
       scan = get_scan()
       now_state = get_rrf(scan)
+      get_occupancy()
+    rospy.loginfo('finish %depisode',j)
