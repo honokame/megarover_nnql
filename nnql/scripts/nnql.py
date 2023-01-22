@@ -8,6 +8,7 @@ import tf
 import sys #引数
 import os #ファイル読み書き
 import csv #リストをcsvに書き込み
+import feature_r9t12 as feature
 from subprocess import *
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
@@ -118,11 +119,12 @@ if __name__ == '__main__':
     set_model('vmegarover', start_x, start_y, 0, start_yaw)
     rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
     scan = get_scan()
+    feature.shapecontext(scan)
     get_status('vmegarover')
     for i in range(4):
       rospy.loginfo('%dstep',i)
-      #action_index = np.random.randint(0, 2)
-      action_index = 1
+      action_index = np.random.randint(0, 3)
+      action_index = 0
       action = action_list[action_index]
       if action == "frontier":
         frontier()
@@ -132,4 +134,5 @@ if __name__ == '__main__':
         random()
 
       scan = get_scan()
+      feature.shapecontext(scan)
       get_status('vmegarover')
