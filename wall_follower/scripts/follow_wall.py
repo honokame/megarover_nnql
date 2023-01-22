@@ -73,7 +73,7 @@ def take_action():
 
   state_description = ''
 
-  d = 0.5 # fine tune distance used to consider a region blocked as by an obstacle
+  d = 0.5 #0.3,0.4 # fine tune distance used to consider a region blocked as by an obstacle
 
   if regions['front'] > d and regions['fleft'] > d and regions['fright'] > d and regions['left'] > d and regions['right'] > d:
     #state_description = 'case 1 - no obstacle sensed'
@@ -217,31 +217,31 @@ def take_action():
 
 def find_wall():
   twistmsg = Twist()
-  twistmsg.linear.x = 0.2
-  twistmsg.angular.z = -0.2 # negative value equals turning CW
+  twistmsg.linear.x = 0.2 
+  twistmsg.angular.z = -0.6 # negative value equals turning CW
   return twistmsg
 
 def drive_straight_ahead():
   twistmsg = Twist()
-  twistmsg.linear.x = 0.15 
+  twistmsg.linear.x = 0.3
   return twistmsg
 
 def turn_left():
   twistmsg = Twist()
-  twistmsg.angular.z = 0.2 # positive value equals turning CCW
+  twistmsg.angular.z = 1.0 # positive value equals turning CCW
   return twistmsg
 
 def follow_the_wall():
   global regions_
 
   twistmsg = Twist()
-  twistmsg.linear.x = 0.25
+  twistmsg.linear.x = 0.5
   return twistmsg
 
 def reverse_left():
   twistmsg = Twist()
-  twistmsg.linear.x = -0.2
-  twistmsg.angular.z = 0.2 # positive value equals turning CCW
+  twistmsg.linear.x = -0.2 
+  twistmsg.angular.z = 1.2 # positive value equals turning CCW
   return twistmsg
 
 def main():
@@ -255,7 +255,7 @@ def main():
 
   srv = rospy.Service('wall_follower_switch', SetBool, wall_follower_switch)
 
-  rate = rospy.Rate(20)
+  rate = rospy.Rate(50)
   while not rospy.is_shutdown():
       #if not active_:
         #    rate.sleep()
@@ -264,19 +264,19 @@ def main():
     msg = Twist()
     if state_ == 0:
       msg = find_wall()
-            #print 'find wall: turn CW and move ahead'
+      print 'find wall: turn CW and move ahead'
     elif state_ == 1:
       msg = turn_left()
-           #print 'turn left'
+      print 'turn left'
     elif state_ == 2:
       msg = follow_the_wall()
-           # print 'follow the wall: keep moving straight ahead'
+      print 'follow the wall: keep moving straight ahead'
     elif state_ == 3:
       msg = drive_straight_ahead()
-           # print 'move slow straight ahead'
+      print 'move slow straight ahead'
     elif state_ == 4:
       msg = reverse_left()
-           #print 'reverse turning left'
+      print 'reverse turning left'
       pass
 
     else:
@@ -286,7 +286,7 @@ def main():
     count+=1
     #print(count)
     rate.sleep()
-    if(count == 500):
+    if(count == 2000):
       break
 
 if __name__ == '__main__':

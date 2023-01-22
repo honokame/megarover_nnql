@@ -121,7 +121,8 @@ if __name__ == '__main__':
     get_status('vmegarover')
     for i in range(4):
       rospy.loginfo('%dstep',i)
-      action_index = np.random.randint(0, 2)
+      #action_index = np.random.randint(0, 2)
+      action_index = 1
       action = action_list[action_index]
       if action == "frontier":
         frontier()
