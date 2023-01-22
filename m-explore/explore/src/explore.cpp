@@ -182,7 +182,7 @@ void Explore::makePlan()
   auto pose = costmap_client_.getRobotPose();
   // get frontiers sorted according to cost
   auto frontiers = search_.searchFrom(pose.position);
-  ROS_DEBUG("found %lu frontiers", frontiers.size());
+  //ROS_DEBUG("found %lu frontiers", frontiers.size());
   //for (size_t i = 0; i < frontiers.size(); ++i) {
   //  ROS_DEBUG("frontier %zd cost: %f", i, frontiers[i].cost);
   //}

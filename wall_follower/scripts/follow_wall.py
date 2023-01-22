@@ -264,19 +264,19 @@ def main():
     msg = Twist()
     if state_ == 0:
       msg = find_wall()
-      print 'find wall: turn CW and move ahead'
+      #print 'find wall: turn CW and move ahead'
     elif state_ == 1:
       msg = turn_left()
-      print 'turn left'
+      #print 'turn left'
     elif state_ == 2:
       msg = follow_the_wall()
-      print 'follow the wall: keep moving straight ahead'
+      #print 'follow the wall: keep moving straight ahead'
     elif state_ == 3:
       msg = drive_straight_ahead()
-      print 'move slow straight ahead'
+      #print 'move slow straight ahead'
     elif state_ == 4:
       msg = reverse_left()
-      print 'reverse turning left'
+      #print 'reverse turning left'
       pass
 
     else:
