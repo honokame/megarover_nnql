@@ -61,7 +61,7 @@ Explore::Explore()
   double timeout;
   double min_frontier_size;
   private_nh_.param("planner_frequency", planner_frequency_, 1.0); //1.0
-  private_nh_.param("progress_timeout", timeout, 30.0); //30.0
+  private_nh_.param("progress_timeout", timeout, 10.0); //30.0
   progress_timeout_ = ros::Duration(timeout);
   private_nh_.param("visualize", visualize_, false); //false
   private_nh_.param("potential_scale", potential_scale_, 3.0); //1e-3
