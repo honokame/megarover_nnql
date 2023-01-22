@@ -46,11 +46,11 @@ def clbk_laser(msg):
     # read the minimum values of each region
     # a second min is required to filter out 'inf' values, in that case 10 is used 
   regions_ = {
-      'right':  min(min(msg.ranges[0:143]), 10),
-      'fright': min(min(msg.ranges[144:287]), 10),
-      'front':  min(min(msg.ranges[288:431]), 10),
-      'fleft':  min(min(msg.ranges[432:575]), 10),
-      'left':   min(min(msg.ranges[576:719]), 10),
+      'right':  min(min(msg.ranges[0:204]), 10), #0:143
+      'fright': min(min(msg.ranges[205:409]), 10), #144:287
+      'front':  min(min(msg.ranges[410:614]), 10), #288:431
+      'fleft':  min(min(msg.ranges[615:819]), 10), #432:575
+      'left':   min(min(msg.ranges[820:1024]), 10), #576:719
       }
 
     #print 'Laser Callback Call!' # for debugging
@@ -76,143 +76,143 @@ def take_action():
   d = 0.5 #0.3,0.4 # fine tune distance used to consider a region blocked as by an obstacle
 
   if regions['front'] > d and regions['fleft'] > d and regions['fright'] > d and regions['left'] > d and regions['right'] > d:
-    #state_description = 'case 1 - no obstacle sensed'
-        #print state_description # for debugging
+    state_description = 'case 1 - no obstacle sensed'
+    #print state_description # for debugging
     change_state(0) # find wall: turn CW and move ahead
   elif regions['front'] < d and regions['fleft'] > d and regions['fright'] > d and regions['left'] > d and regions['right'] > d:
-      #state_description = 'case 2 - obstacle sensed only in front'
-        #print state_description # for debugging
+    state_description = 'case 2 - obstacle sensed only in front'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] > d and regions['fleft'] > d and regions['fright'] < d and regions['left'] > d and regions['right'] > d:
-      #state_description = 'case 3 - obstacle sensed only in front-right'
-        #print state_description # for debugging
+    state_description = 'case 3 - obstacle sensed only in front-right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] > d and regions['fleft'] < d and regions['fright'] > d and regions['left'] > d and regions['right'] > d:
-      #state_description = 'case 4 - obstacle sensed only in front-left'
-        #print state_description # for debugging
+    state_description = 'case 4 - obstacle sensed only in front-left'
+    #print state_description # for debugging
     change_state(0) # find wall: turn CW and move ahead
   elif regions['front'] < d and regions['fleft'] > d and regions['fright'] < d and regions['left'] > d and regions['right'] > d:
-      #state_description = 'case 5 - obstacle sensed in front and front-right'
-        #print state_description # for debugging
+    state_description = 'case 5 - obstacle sensed in front and front-right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] < d and regions['fleft'] < d and regions['fright'] > d and regions['left'] > d and regions['right'] > d:
-      #state_description = 'case 6 - obstacle sensed in front and front-left'
-        #print state_description # for debugging
+    state_description = 'case 6 - obstacle sensed in front and front-left'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d and regions['left'] > d and regions['right'] > d:
-      #state_description = 'case 7 - obstacle sensed in front and front-left and front-right'
-        #print state_description # for debugging
+    state_description = 'case 7 - obstacle sensed in front and front-left and front-right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] > d and regions['fleft'] < d and regions['fright'] < d and regions['left'] > d and regions['right'] > d:
-      #state_description = 'case 8 - obstacle sensed in front-left and front-right'
-        #print state_description # for debugging
+    state_description = 'case 8 - obstacle sensed in front-left and front-right'
+    #print state_description # for debugging
     change_state(3) # move slow straight ahead
 
 # logic block 2:          
   elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d and regions['left'] > d and regions['right'] < d:
-      #state_description = 'case 9 - obstacle sensed only in right'
-        #print state_description # for debugging
+    state_description = 'case 9 - obstacle sensed only in right'
+    #print state_description # for debugging
     change_state(2) #follow the wall: keep moving straight ahead
   elif regions['front'] < d and regions['fleft'] > d and regions['fright'] > d and regions['left'] > d and regions['right'] < d:
-      #state_description = 'case 10 - obstacle sensed in front and right'
-        #print state_description # for debugging
+    state_description = 'case 10 - obstacle sensed in front and right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] > d and regions['fleft'] > d and regions['fright'] < d and regions['left'] > d and regions['right'] < d:
-      #state_description = 'case 11 - obstacle sensed in front-right and right'
-        #print state_description # for debugging
+    state_description = 'case 11 - obstacle sensed in front-right and right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] > d and regions['fleft'] < d and regions['fright'] > d and regions['left'] > d and regions['right'] < d:
-     #state_description = 'case 12 - obstacle sensed in front-left and right'
-        #print state_description # for debugging
+    state_description = 'case 12 - obstacle sensed in front-left and right'
+    #print state_description # for debugging
     change_state(3) # move slow straight ahead
   elif regions['front'] < d and regions['fleft'] > d and regions['fright'] < d and regions['left'] > d and regions['right'] < d:
-      #state_description = 'case 13 - obstacle sensed in front, front-right and right'
-        #print state_description # for debugging
+    state_description = 'case 13 - obstacle sensed in front, front-right and right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] < d and regions['fleft'] < d and regions['fright'] > d and regions['left'] > d and regions['right'] < d:
-      #state_description = 'case 14 - obstacle sensed in front, front-left and right'
-       # print state_description # for debugging
+    state_description = 'case 14 - obstacle sensed in front, front-left and right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d and regions['left'] > d and regions['right'] < d:
-      #state_description = 'case 15 - obstacle sensed in front, front-left, front-right and right'
-        #print state_description # for debugging
+    state_description = 'case 15 - obstacle sensed in front, front-left, front-right and right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] > d and regions['fleft'] < d and regions['fright'] < d and regions['left'] > d and regions['right'] < d:
-      #state_description = 'case 16 - obstacle sensed in front-left, front-right and right'
-        #print state_description # for debugging
+    state_description = 'case 16 - obstacle sensed in front-left, front-right and right'
+    #print state_description # for debugging
     change_state(3) # move slow straight ahead
 
 # logic block 3:  
   elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d and regions['left'] < d and regions['right'] > d:
-      #state_description = 'case 17 - obstacle sensed only in left'
-       # print state_description # for debugging
+    state_description = 'case 17 - obstacle sensed only in left'
+    #print state_description # for debugging
     change_state(0) # find wall: turn CW and move ahead
   elif regions['front'] < d and regions['fleft'] > d and regions['fright'] > d and regions['left'] < d and regions['right'] > d:
-      #state_description = 'case 18 - obstacle sensed in front and left'
-       # print state_description # for debugging
+    state_description = 'case 18 - obstacle sensed in front and left'
+    #print state_description # for debugging
     change_state(0) # find wall: turn CW and move ahead
   elif regions['front'] > d and regions['fleft'] > d and regions['fright'] < d and regions['left'] < d and regions['right'] > d:
-      #state_description = 'case 19 - obstacle sensed in front-right and left'
-       # print state_description # for debugging
+    state_description = 'case 19 - obstacle sensed in front-right and left'
+    #print state_description # for debugging
     change_state(3) # move slow straight ahead
   elif regions['front'] > d and regions['fleft'] < d and regions['fright'] > d and regions['left'] < d and regions['right'] > d:
-      # state_description = 'case 20 - obstacle sensed in front-left and left'
-       # print state_description # for debugging
+    state_description = 'case 20 - obstacle sensed in front-left and left'
+    #print state_description # for debugging
     change_state(0) # find wall: turn CW and move ahead
   elif regions['front'] < d and regions['fleft'] > d and regions['fright'] < d and regions['left'] < d and regions['right'] > d:
-      # state_description = 'case 21 - obstacle sensed in front, front-right and left'
-       # print state_description # for debugging
+    state_description = 'case 21 - obstacle sensed in front, front-right and left'
+    #print state_description # for debugging
     change_state(0) # find wall: turn CW and move ahead
   elif regions['front'] < d and regions['fleft'] < d and regions['fright'] > d and regions['left'] < d and regions['right'] > d:
-      # state_description = 'case 22 - obstacle sensed in front, front-left and left'
-       # print state_description # for debugging
+    state_description = 'case 22 - obstacle sensed in front, front-left and left'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d and regions['left'] < d and regions['right'] > d:
-      #state_description = 'case 23 - obstacle sensed in front, front-left, front-right and left'
-      #  print state_description # for debugging
+    state_description = 'case 23 - obstacle sensed in front, front-left, front-right and left'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] > d and regions['fleft'] < d and regions['fright'] < d and regions['left'] < d and regions['right'] > d:
-      #state_description = 'case 24 - obstacle sensed in front-left, front-right and left'
-       # print state_description # for debugging
+    state_description = 'case 24 - obstacle sensed in front-left, front-right and left'
+    #print state_description # for debugging
     change_state(3) # move slow straight ahead
 
 # logic block 4:  
   elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d and regions['left'] < d and regions['right'] < d:
-      # state_description = 'case 25 - obstacle sensed in left and right'
-       # print state_description # for debugging
+    state_description = 'case 25 - obstacle sensed in left and right'
+    #print state_description # for debugging
     change_state(3) # move slow straight ahead
   elif regions['front'] < d and regions['fleft'] > d and regions['fright'] > d and regions['left'] < d and regions['right'] < d:
-      # state_description = 'case 26 - obstacle sensed in front, left and right'
-       # print state_description # for debugging
+    state_description = 'case 26 - obstacle sensed in front, left and right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] > d and regions['fleft'] > d and regions['fright'] < d and regions['left'] < d and regions['right'] < d:
-      # state_description = 'case 27 - obstacle sensed in front-right, left and right'
-       # print state_description # for debugging
+    state_description = 'case 27 - obstacle sensed in front-right, left and right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] > d and regions['fleft'] < d and regions['fright'] > d and regions['left'] < d and regions['right'] < d:
-      # state_description = 'case 28 - obstacle sensed in front-left, left and right'
-       # print state_description # for debugging
+    state_description = 'case 28 - obstacle sensed in front-left, left and right'
+    #print state_description # for debugging
     change_state(0) # find wall: turn CW and move ahead
   elif regions['front'] < d and regions['fleft'] > d and regions['fright'] < d and regions['left'] < d and regions['right'] < d:
-      # state_description = 'case 29 - obstacle sensed in front, front-right, left and right'
-       # print state_description # for debugging
+    state_description = 'case 29 - obstacle sensed in front, front-right, left and right'
+    #print state_description # for debugging
     change_state(1) # turn left
   elif regions['front'] < d and regions['fleft'] < d and regions['fright'] > d and regions['left'] < d and regions['right'] < d:
-      # state_description = 'case 30 - obstacle sensed in front, front-left, left and right'
-       # print state_description # for debugging
+    state_description = 'case 30 - obstacle sensed in front, front-left, left and right'
+    #print state_description # for debugging
     change_state(0) # find wall: turn CW and move ahead
   elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d and regions['left'] < d and regions['right'] < d:
-      # state_description = 'case 31 - obstacle sensed in front, front-left, front-right, left and right'
-       # print state_description # for debugging
+    state_description = 'case 31 - obstacle sensed in front, front-left, front-right, left and right'
+    #print state_description # for debugging
     change_state(4) # reverse turning left
   elif regions['front'] > d and regions['fleft'] < d and regions['fright'] < d and regions['left'] < d and regions['right'] < d:
-      # state_description = 'case 32 - obstacle sensed in front-left, front-right, left and right'
-       # print state_description # for debugging
+    state_description = 'case 32 - obstacle sensed in front-left, front-right, left and right'
+    #print state_description # for debugging
     change_state(3) # move slow straight ahead
 
   else:
-      # state_description = 'unknown case'
-       # print 'unknown case' # for debugging
+    state_description = 'unknown case'
+    #print 'unknown case' # for debugging
     rospy.loginfo(regions)
 
 def find_wall():
@@ -257,9 +257,9 @@ def main():
 
   rate = rospy.Rate(50)
   while not rospy.is_shutdown():
-      #if not active_:
-        #    rate.sleep()
-        #    continue
+    #if not active_:
+      #rate.sleep()
+      #continue
 
     msg = Twist()
     if state_ == 0:
