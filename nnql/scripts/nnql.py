@@ -8,7 +8,7 @@ import tf
 import sys #引数
 import os #ファイル読み書き
 import csv #リストをcsvに書き込み
-import feature_r9t12 as feature
+import feature_r9t12 as feature #特徴量計算
 from subprocess import *
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
@@ -118,9 +118,13 @@ if __name__ == '__main__':
     start_yaw = np.random.randint(0, 361)
     set_model('vmegarover', start_x, start_y, 0, start_yaw)
     rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
+    get_status('vmegarover')
     scan = get_scan()
     feature.shapecontext(scan)
-    get_status('vmegarover')
+    os.system('python3 gcntest.py')
+    state = np.loadtxt(fname="temp_rrf.csv", dtype="float", delimiter=",")
+    now_state = state.tolist()
+    print(now_state)
     for i in range(4):
       rospy.loginfo('%dstep',i)
       action_index = np.random.randint(0, 3)
@@ -132,7 +136,8 @@ if __name__ == '__main__':
         wall()
       elif action == "random":
         random()
-
+      
+      get_status('vmegarover')
       scan = get_scan()
       feature.shapecontext(scan)
-      get_status('vmegarover')
+      os.system('python3 gcntest.py')
