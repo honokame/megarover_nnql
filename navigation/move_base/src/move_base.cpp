@@ -75,10 +75,10 @@ namespace move_base {
     private_nh.param("planner_frequency", planner_frequency_, 0.0);
     private_nh.param("controller_frequency", controller_frequency_, 20.0);
     private_nh.param("planner_patience", planner_patience_, 5.0);
-    private_nh.param("controller_patience", controller_patience_, 15.0);
-    private_nh.param("max_planning_retries", max_planning_retries_, -1);  // disabled by default
+    private_nh.param("controller_patience", controller_patience_, 5.0); //15
+    private_nh.param("max_planning_retries", max_planning_retries_, 10); //-1 // disabled by default
 
-    private_nh.param("oscillation_timeout", oscillation_timeout_, 0.0);
+    private_nh.param("oscillation_timeout", oscillation_timeout_, 5.0); //0;
     private_nh.param("oscillation_distance", oscillation_distance_, 0.5);
 
     // parameters of make_plan service
@@ -1120,7 +1120,6 @@ namespace move_base {
       ros::NodeHandle n("~");
       n.setParam("conservative_reset/reset_distance", conservative_reset_dist_);
       n.setParam("aggressive_reset/reset_distance", circumscribed_radius_ * 4);
-
       //first, we'll load a recovery behavior to clear the costmap
       boost::shared_ptr<nav_core::RecoveryBehavior> cons_clear(recovery_loader_.createInstance("clear_costmap_recovery/ClearCostmapRecovery"));
       cons_clear->initialize("conservative_reset", &tf_, planner_costmap_ros_, controller_costmap_ros_);
@@ -1128,11 +1127,11 @@ namespace move_base {
       recovery_behaviors_.push_back(cons_clear);
 
       //next, we'll load a recovery behavior to rotate in place
-      boost::shared_ptr<nav_core::RecoveryBehavior> rotate(recovery_loader_.createInstance("rotate_recovery/RotateRecovery"));
+      boost::shared_ptr<nav_core::RecoveryBehavior> slow(recovery_loader_.createInstance("move_slow_and_clear/MoveSlowAndClear")); //rotate_recovery/RotateRecovery
       if(clearing_rotation_allowed_){
-        rotate->initialize("rotate_recovery", &tf_, planner_costmap_ros_, controller_costmap_ros_);
-        recovery_behavior_names_.push_back("rotate_recovery");
-        recovery_behaviors_.push_back(rotate);
+        slow->initialize("move_slow_and_clear", &tf_, planner_costmap_ros_, controller_costmap_ros_);
+        recovery_behavior_names_.push_back("move_slow_and_clear");
+        recovery_behaviors_.push_back(slow);
       }
 
       //next, we'll load a recovery behavior that will do an aggressive reset of the costmap
@@ -1143,8 +1142,8 @@ namespace move_base {
 
       //we'll rotate in-place one more time
       if(clearing_rotation_allowed_){
-        recovery_behaviors_.push_back(rotate);
-        recovery_behavior_names_.push_back("rotate_recovery");
+        recovery_behaviors_.push_back(slow);
+        recovery_behavior_names_.push_back("move_slow_and_clear");
       }
     }
     catch(pluginlib::PluginlibException& ex){

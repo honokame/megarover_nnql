@@ -59,11 +59,11 @@ namespace move_slow_and_clear
 
     ros::NodeHandle private_nh_("~/" + n);
     private_nh_.param("clearing_distance", clearing_distance_, 0.5);
-    private_nh_.param("limited_trans_speed", limited_trans_speed_, 0.25);
-    private_nh_.param("limited_rot_speed", limited_rot_speed_, 0.45);
+    private_nh_.param("limited_trans_speed", limited_trans_speed_, 0.6);
+    private_nh_.param("limited_rot_speed", limited_rot_speed_, 1.0);
     private_nh_.param("limited_distance", limited_distance_, 0.3);
-    private_nh_.param("max_trans_param_name", max_trans_param_name_, std::string("max_trans_vel"));
-    private_nh_.param("max_rot_param_name", max_rot_param_name_, std::string("max_rot_vel"));
+    private_nh_.param("max_trans_param_name", max_trans_param_name_, std::string("max_vel_trans"));
+    private_nh_.param("max_rot_param_name", max_rot_param_name_, std::string("max_vel_theta"));
 
     std::string planner_namespace;
     private_nh_.param("planner_namespace", planner_namespace, std::string("DWAPlannerROS"));
@@ -83,7 +83,6 @@ namespace move_slow_and_clear
     geometry_msgs::PoseStamped global_pose, local_pose;
     global_costmap_->getRobotPose(global_pose);
     local_costmap_->getRobotPose(local_pose);
-
     std::vector<geometry_msgs::Point> global_poly, local_poly;
     geometry_msgs::Point pt;
 
