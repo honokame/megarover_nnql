@@ -166,7 +166,7 @@ if __name__ == '__main__':
         Qdatabase = NNQL.q_learning(state,state_next,do_action,reward,knn_list_all,q_list,Qdatabase) #q値更新 
    
 
-     if episode%1000 == 0: 
+     if episode%50 == 0: #1000>50
         NNQL.save_Qdatabase(Qdatabase,episode,train) #Qdatabase保存
 
      if episode%25 == 0:
