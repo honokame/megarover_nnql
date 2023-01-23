@@ -15,6 +15,9 @@ from tf import transformations
 from std_srvs.srv import *
 
 import math
+import os
+from gazebo_msgs.srv import GetModelState
+from gazebo_msgs.msg import ModelState
 
 active_ = False
 pub_ = None # defining a global publisher
@@ -244,9 +247,34 @@ def reverse_left():
   twistmsg.angular.z = 1.2 # positive value equals turning CCW
   return twistmsg
 
+def get_model(name):
+  rospy.wait_for_service('/gazebo/get_model_state')
+  try:
+    serviceResponse = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
+    get_state = serviceResponse(model_name=name)
+  except rospy.ServiceException, e:
+    print("Service call failed: %s" %e)
+  return get_state
+
+def get_status(name):
+  model_state = get_model(name)
+  x = model_state.pose.position.x
+  y = model_state.pose.position.y
+  #print(str(name),x, y, yaw)
+  #print(str(name),int(x),int(y),round(yaw))
+  #rospy.loginfo('x:%f, y:%f',x, y)
+  return x, y
+
 def main():
   global pub_, active_ # to use this global variables inside main()
-  count = 0;
+  count = 0
+  now_x = 0
+  now_y = 0
+  new_x = 0
+  new_y = 0
+  dis = 0
+  total_dis = 0
+  
   rospy.init_node('reading_laser')
 
   pub_ = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
@@ -254,6 +282,9 @@ def main():
   sub = rospy.Subscriber('/scan', LaserScan, clbk_laser)
 
   srv = rospy.Service('wall_follower_switch', SetBool, wall_follower_switch)
+  
+  dis_csv = '/home/chinourobot/catkin_ws/src/megarover_nnql/nnql/scripts/temp_dis.csv'
+  f_dis = open(dis_csv,'w')
 
   rate = rospy.Rate(50)
   while not rospy.is_shutdown():
@@ -281,12 +312,22 @@ def main():
 
     else:
       rospy.logerr('Unknown state!')
+    
+    now_x, now_y = get_status('vmegarover')
 
     pub_.publish(msg)
     count+=1
-    #print(count)
+    print(count)
     rate.sleep()
-    if(count == 2000):
+    
+    new_x,new_y = get_status('vmegarover')
+    dis = math.sqrt((new_x - now_x)**2 + (new_y - now_y)**2)
+    total_dis = total_dis + dis;
+    rospy.loginfo('distance:%f', dis)
+    rospy.loginfo('total_distance:%f',total_dis)
+    
+    if(count == 1500):
+      f_dis.write(str(total_dis))
       break
 
 if __name__ == '__main__':
