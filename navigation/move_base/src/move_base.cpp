@@ -46,7 +46,20 @@
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
+#include <gazebo_msgs/GetModelState.h>
+#include <gazebo_msgs/ModelState.h>
+#include <math.h>
+#include <iostream>
+#include <fstream>
+
 int count = 0;
+float now_x = 0;
+float now_y = 0;
+float new_x = 0;
+float new_y = 0;
+float dis = 0;
+float total_dis = 0;
+bool pos_flag = 0;
 namespace move_base {
 
   MoveBase::MoveBase(tf2_ros::Buffer& tf) :
@@ -96,6 +109,8 @@ namespace move_base {
     //for commanding the base
     vel_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     current_goal_pub_ = private_nh.advertise<geometry_msgs::PoseStamped>("current_goal", 0 );
+    //ros::ServiceClient client_ = nh.serviceClient<gazebo_msgs::GetModelState>("/gazebo/get_model_state");
+
 
     ros::NodeHandle action_nh("move_base");
     action_goal_pub_ = action_nh.advertise<move_base_msgs::MoveBaseActionGoal>("goal", 1);
@@ -106,7 +121,7 @@ namespace move_base {
     //like nav_view and rviz
     ros::NodeHandle simple_nh("move_base_simple");
     goal_sub_ = simple_nh.subscribe<geometry_msgs::PoseStamped>("goal", 1, boost::bind(&MoveBase::goalCB, this, _1));
-
+    
     //we'll assume the radius of the robot to be consistent with what's specified for the costmaps
     private_nh.param("local_costmap/inscribed_radius", inscribed_radius_, 0.325);
     private_nh.param("local_costmap/circumscribed_radius", circumscribed_radius_, 0.46);
@@ -179,7 +194,7 @@ namespace move_base {
     dynamic_reconfigure::Server<move_base::MoveBaseConfig>::CallbackType cb = boost::bind(&MoveBase::reconfigureCB, this, _1, _2);
     dsrv_->setCallback(cb);
   }
-
+  
   void MoveBase::reconfigureCB(move_base::MoveBaseConfig &config, uint32_t level){
     boost::recursive_mutex::scoped_lock l(configuration_mutex_);
 
@@ -683,9 +698,37 @@ namespace move_base {
     planning_retries_ = 0;
 
     ros::NodeHandle n;
+    gazebo_msgs::GetModelState getModelState;
+    std::string modelName = (std::string)"vmegarover" ;
+    geometry_msgs::Point pos;
+    //float now_x,now_y,new_x,new_y;
+    //std::string relativeEntityName = (std::string)"world"
     while(n.ok())
     {
-      //int count = 0;
+      ros::ServiceClient client = n.serviceClient<gazebo_msgs::GetModelState>("/gazebo/get_model_state");
+      getModelState.request.model_name = modelName;
+      client.call(getModelState);
+      pos = getModelState.response.pose.position;
+      if(pos_flag == 0){
+        now_x = pos.x;
+        now_y = pos.y;
+        pos_flag = 1;
+      }else if(pos_flag == 1){
+        new_x = pos.x;
+        new_y = pos.y;
+        dis = sqrt(pow(new_x-now_x, 2) + pow(new_y-now_y, 2)); 
+        total_dis += dis;
+        //ROS_INFO("distance:%f",dis);
+        //ROS_INFO("total_distance:%f",total_dis);
+        std::ofstream ofs;
+        std::string ofs_file = "/home/chinourobot/catkin_ws/src/megarover_nnql/nnql/scripts/temp_dis.txt";
+        ofs.open(ofs_file, std::ios::app);
+        ofs << total_dis << std::endl;
+            
+        now_x = new_x;
+        now_y = new_y;
+      }
+
       if(c_freq_change_)
       {
         ROS_INFO("Setting controller frequency to %.2f", controller_frequency_);
@@ -919,8 +962,12 @@ namespace move_base {
                            cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z );
           last_valid_control_ = ros::Time::now();
           //make sure that we send the velocity command to the base
-          vel_pub_.publish(cmd_vel);
+          
+          vel_pub_.publish(cmd_vel); 
           count += 1;
+          ROS_INFO("move_base_count:%d",count);
+
+         // count += 1;
           if(count == 300){
             system("rosnode kill explore");
             ros::shutdown();
@@ -955,7 +1002,6 @@ namespace move_base {
           }
         }
         }
-
         break;
 
       //we'll try to clear out space with any user-provided recovery behaviors
@@ -1022,7 +1068,6 @@ namespace move_base {
         as_->setAborted(move_base_msgs::MoveBaseResult(), "Reached a case that should not be hit in move_base. This is a bug, please report it.");
         return true;
     }
-
     //we aren't done yet
     return false;
   }
