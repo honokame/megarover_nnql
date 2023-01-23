@@ -48,9 +48,9 @@
 
 #include <gazebo_msgs/GetModelState.h>
 #include <gazebo_msgs/ModelState.h>
-#include <math.h>
-#include <iostream>
-#include <fstream>
+#include <math.h> //距離算出
+#include <iostream> //ファイル出力
+#include <fstream> //ファイル出力
 
 int count = 0;
 float now_x = 0;
@@ -709,23 +709,26 @@ namespace move_base {
       getModelState.request.model_name = modelName;
       client.call(getModelState);
       pos = getModelState.response.pose.position;
-      if(pos_flag == 0){
-        now_x = pos.x;
-        now_y = pos.y;
+      std::ofstream ofs;
+      std::string ofs_file = "/home/chinourobot/catkin_ws/src/megarover_nnql/nnql/scripts/temp_dis.csv";
+        
+      if(pos_flag == 0){ // はじめの一回のみ実行
+        now_x = pos.x; // 初期位置
+        now_y = pos.y; 
+        ofs.open(ofs_file, std::ios::out);
+        ofs << "0.0" << std::flush;
         pos_flag = 1;
-      }else if(pos_flag == 1){
-        new_x = pos.x;
+      }else if(pos_flag == 1){ // 距離を求める
+        new_x = pos.x; // 移動後の位置
         new_y = pos.y;
-        dis = sqrt(pow(new_x-now_x, 2) + pow(new_y-now_y, 2)); 
-        total_dis += dis;
+        dis = sqrt(pow(new_x-now_x, 2) + pow(new_y-now_y, 2)); // 距離、移動前との差分
+        total_dis += dis; // 全移動距離
         //ROS_INFO("distance:%f",dis);
         //ROS_INFO("total_distance:%f",total_dis);
-        std::ofstream ofs;
-        std::string ofs_file = "/home/chinourobot/catkin_ws/src/megarover_nnql/nnql/scripts/temp_dis.txt";
-        ofs.open(ofs_file, std::ios::app);
-        ofs << total_dis << std::endl;
+        ofs.open(ofs_file, std::ios::out); // 最新の全移動距離を書き込み
+        ofs << total_dis << std::flush;
             
-        now_x = new_x;
+        now_x = new_x; // 移動後の位置を移動前の位置にする
         now_y = new_y;
       }
 
@@ -965,9 +968,8 @@ namespace move_base {
           
           vel_pub_.publish(cmd_vel); 
           count += 1;
-          ROS_INFO("move_base_count:%d",count);
+          //ROS_INFO("move_base_count:%d",count);
 
-         // count += 1;
           if(count == 300){
             system("rosnode kill explore");
             ros::shutdown();
