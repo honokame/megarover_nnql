@@ -317,14 +317,14 @@ def main():
 
     pub_.publish(msg)
     count+=1
-    print(count)
+    #print(count)
     rate.sleep()
     
     new_x,new_y = get_status('vmegarover')
     dis = math.sqrt((new_x - now_x)**2 + (new_y - now_y)**2)
     total_dis = total_dis + dis;
-    rospy.loginfo('distance:%f', dis)
-    rospy.loginfo('total_distance:%f',total_dis)
+    #rospy.loginfo('distance:%f', dis)
+    #rospy.loginfo('total_distance:%f',total_dis)
     
     if(count == 1500):
       f_dis.write(str(total_dis))
