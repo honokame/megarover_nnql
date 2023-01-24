@@ -211,7 +211,7 @@ if __name__ == '__main__':
     while(step < 5):
       print("---------------------------------------------------------------------")
       rospy.loginfo('%dstep',step)
-      eps_random = np.random.random()
+      eps_random = np.random.rand()
       if not (episode == 0 or eps>eps_random) :
         q_average,knn_list = NNQL.knn(now_state,use_Qdatabase) #knn,now_state=クラス固有ベクトル
         action_maxIndex = [i for i, x in enumerate(q_average) if x == max(q_average)]
