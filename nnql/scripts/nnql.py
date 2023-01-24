@@ -101,7 +101,7 @@ def random():
   goal.target_pose.pose.orientation.z = np.sin((yaw*np.pi/180) / 2)
   goal.target_pose.pose.orientation.w = np.cos((yaw*np.pi/180) / 2)
   ac.send_goal(goal) 
-  rospy.sleep(10)
+  rospy.sleep(20)
   p = call(['rosnode','kill','move_base'])
   rospy.sleep(1)
 
@@ -112,37 +112,58 @@ def get_rrf(scan):
   rrf = state.tolist()
   return rrf
 
-def get_occupancy():
+def get_occupancy(): #14000:100%,11200:80%
   msg = rospy.wait_for_message('map', OccupancyGrid)
   mapdata = msg.data
   occupancy = len(mapdata) - mapdata.count(-1)
   rospy.loginfo('occupancy cell:%d',occupancy)
-  return occupancy
+  rate = occupancy/float(14000)*100
+  return rate
 
+def get_distance():
+  temp_dis = np.loadtxt(fname="temp_dis.csv", dtype="float", delimiter=",")
+  rospy.loginfo('temp_dis:%f',temp_dis)
+  return temp_dis
+
+def get_reward(occupancy, distance):
+  if(occupancy <= 40):
+    reward = -1
+  elif(distance <= 10):
+    reward = -1
+  else:
+    reward = occupancy/float(distance)
+  rospy.loginfo('occupancy:%f, distance:%f, reward:%f',occupancy, distance, reward)
+  return reward
+
+
+ 
 if __name__ == '__main__':
   rospy.init_node('nnql') #ノードの初期化
 
-  args = sys.argv #引数
-  status_csv = 'status' + args[1] + '.csv'
-  scan_csv = 'scan' + args[1] + '.csv'
+  #args = sys.argv #引数
+  #status_csv = 'status' + args[1] + '.csv'
+  status_csv = 'groundtruth.csv'
+  #scan_csv = 'scan' + args[1] + '.csv'
   f_status = open(status_csv,'w')
-  f_scan = open(scan_csv,'w')
+  #f_scan = open(scan_csv,'w')
   action_list = ["frontier", "wall", "random"]
   for j in range(10):
+    print("=======================================================================")
     p = call(['rosnode','kill','slam_gmapping'])
     start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
     start_yaw = np.random.randint(0, 361)
     set_model('vmegarover', start_x, start_y, 0, start_yaw)
     rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
+    distance = 0
     get_status('vmegarover')
     scan = get_scan()
     now_state = get_rrf(scan)
     get_occupancy()
-    print(now_state)
     for i in range(4):
+      print("---------------------------------------------------------------------")
       rospy.loginfo('%dstep',i)
       action_index = np.random.randint(0, 3)
-      #action_index = 0
+      #action_index = 1
       action = action_list[action_index]
       rospy.loginfo('action:%s',action)
       if action == "frontier":
@@ -155,5 +176,9 @@ if __name__ == '__main__':
       get_status('vmegarover')
       scan = get_scan()
       now_state = get_rrf(scan)
-      get_occupancy()
+      occupancy = get_occupancy()
+      temp_dis = get_distance()
+      distance = distance + temp_dis
     rospy.loginfo('finish %depisode',j)
+    reward = get_reward(occupancy, distance)
+
