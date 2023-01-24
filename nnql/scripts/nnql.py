@@ -124,12 +124,12 @@ def get_distance():
   return temp_dis
 
 def get_reward(occupancy, distance):
-  if(occupancy <= 40):
-    reward = -1
-  elif(distance <= 10):
-    reward = -1
-  else:
-    reward = occupancy/float(distance)
+  #if(occupancy <= 40):
+  #  reward = -1
+  #elif(distance <= 10):
+  #  reward = -1
+  #else:
+  reward = occupancy/float(distance)
   rospy.loginfo('occupancy:%f, distance:%f, reward:%f',occupancy, distance, reward)
   return reward
 
@@ -175,9 +175,11 @@ if __name__ == '__main__':
   #scan_csv = 'scan' + args[1] + '.csv'
   f_status = open(status_csv,'w')
   #f_scan = open(scan_csv,'w')
+  result_csv = 'NNQL/result.csv'
+  f_result = open(result_csv,'w')
   qdata_path = 'NNQL/Qdatabase'
   episode = 1
-  max_episode = 10000
+  max_episode = 100000
   step = 1
   NNQL = NNQL_class(qdata_path) #NNQL
   Qdatabase = NNQL.mk_Qdatabase(episode,0) #Qデータベース作成
@@ -243,8 +245,11 @@ if __name__ == '__main__':
         map_num = str(episode)+'_'+str(step)
         os.system('rosrun map_server map_saver -f NNQL/{}'.format(map_num))
       step = step+1
-
+      result_action = str(action_index)+','
+      f_result.write(result_action)
     reward = get_reward(occupancy, distance) #報酬
+    result_episode = str(reward)+','+str(occupancy)+','+str(distance)+'\n'
+    f_result.write(result_episode)
     for env in env_list:
       state = env[0]
       state_next = env[1]
