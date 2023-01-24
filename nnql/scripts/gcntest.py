@@ -18,6 +18,8 @@ import csv
 
 output_file = 'temp_rrf.csv'
 r_file = open(output_file,'w')
+test_file = 'NNQL/gcntest.csv'
+t_file = open(test_file,'a')
 
 #テストデータ読み込み
 test_data = np.loadtxt(fname="temp_feature.csv", dtype="int", delimiter=",")
@@ -119,5 +121,7 @@ rank = rankdata(-np.array(output[0]))
 rrf = np.reciprocal(rank) #逆ランクベクトル
 rrf = rrf.tolist()
 
+t_file.write(str(int(argmax_Y[0])+1))
+t_file.write('\n')
 writer = csv.writer(r_file)
 writer.writerow(rrf)
