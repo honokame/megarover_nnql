@@ -19,13 +19,13 @@ class NNQL_class:
         if episode == 1:
             Qdatabase = {} #{state:Qdata}
         else:
-            with open(self.qdatabase_path +'/Qdatabase_T'+str(episode)+'.pickle', mode='rb') as f:
+            with open(self.qdatabase_path +'/Qdatabase'+str(episode)+'.pickle', mode='rb') as f:
                 Qdatabase = pickle.load(f)
         return Qdatabase
 
    def save_Qdatabase(self,Qdatabase,episode,train):  #データを保存
        #os.makedirs(self.qdatabase_path,exist_ok=True) #python3
-       with open(self.qdatabase_path +'/Qdatabase_T'+str(episode)+'.pickle', mode='wb') as f:
+       with open(self.qdatabase_path +'/Qdatabase'+str(episode)+'.pickle', mode='wb') as f:
             pickle.dump(Qdatabase,f)
 
 
