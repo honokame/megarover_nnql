@@ -16,7 +16,7 @@ class NNQL_class:
        self.qdatabase_path = qdata_path
 
    def mk_Qdatabase(self,episode,train):
-        if episode == 0:
+        if episode == 1:
             Qdatabase = {} #{state:Qdata}
         else:
             with open(self.qdatabase_path +'/Qdatabase_T'+str(episode)+'.pickle', mode='rb') as f:
