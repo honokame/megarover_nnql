@@ -970,7 +970,7 @@ namespace move_base {
           count += 1;
           //ROS_INFO("move_base_count:%d",count);
 
-          if(count == 300){
+          if(count == 350){
             system("rosnode kill explore");
             ros::shutdown();
             break;
