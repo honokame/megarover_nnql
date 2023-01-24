@@ -135,8 +135,39 @@ def get_reward(occupancy, distance):
   rospy.loginfo('occupancy:%f, distance:%f, reward:%f',occupancy, distance, reward)
   return reward
 
-
- 
+def start():
+  seed = np.random.randint(0,19) #19
+  yaw = np.random.randint(0,361)
+  if(seed < 8): #0-7
+    x = np.random.uniform(0.5,7.2)
+    if((x >= 1.7) & (x < 2.3)):
+      y = 2.4
+    else:
+      y = np.random.uniform(2.2,2.4)
+  elif(seed < 12): #8-11
+    x = np.random.uniform(1.6,4.3)
+    if((x >= 1.8) & (x <= 2.9) | ((x >= 3.7) & (x <= 4.3))):
+      y = 5.3
+    else:
+      y = np.random.uniform(5.3,5.5)
+  elif(seed < 14): #12-13
+    x = 1
+    y = np.random.uniform(2.4,5.0)
+    f = np.random.randint(1,3)
+    yaw = 90*f
+  elif(seed == 16): #14-15
+    x = 4.4
+    y = np.random.uniform(2.4,5.0) 
+    f = np.random.randint(1,3)
+    yaw = 90*f
+  elif(seed < 19): #16-18
+    x = np.random.uniform(7.4,7.4)
+    y = np.random.uniform(3.6,4.9)
+  elif(seed < 20): # 19   
+    x = np.random.uniform(8.1,8.4)
+    y = np.random.uniform(5.2,5.9)
+  return x,y,yaw
+  
 if __name__ == '__main__':
   rospy.init_node('nnql') #ノードの初期化
 
@@ -150,8 +181,9 @@ if __name__ == '__main__':
   for j in range(10):
     print("=======================================================================")
     p = call(['rosnode','kill','slam_gmapping'])
-    start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
-    start_yaw = np.random.randint(0, 361)
+    #start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
+    #start_yaw = np.random.randint(0, 361)
+    start_x, start_y, start_yaw = start()
     set_model('vmegarover', start_x, start_y, 0, start_yaw)
     rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
     distance = 0
