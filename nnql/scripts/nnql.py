@@ -177,7 +177,7 @@ if __name__ == '__main__':
   #f_scan = open(scan_csv,'w')
   qdata_path = 'NNQL/Qdatabase'
   episode = 1
-  max_episode = 50
+  max_episode = 10000
   step = 1
   NNQL = NNQL_class(qdata_path) #NNQL
   Qdatabase = NNQL.mk_Qdatabase(episode,0) #Qデータベース作成
