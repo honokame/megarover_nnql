@@ -19,6 +19,7 @@ from std_srvs.srv import Empty
 import actionlib #random()
 from actionlib_msgs.msg import * #random()
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal #random()
+from learn import NNQL_class
 
 pos_start = [[0.5,2.3],[1.5,2.5],[4.2,2.5],[5.5,2.3],[6.5,2.2],[7.5,4.5],[8.5,5.7],[4.3,5.3]]
 
@@ -65,6 +66,8 @@ def get_status(name):
   q4 = model_state.pose.orientation.w
   eular = tf.transformations.euler_from_quaternion((q1, q2, q3, q4))
   yaw = round(eular[2]*180/np.pi)
+  if(yaw < 0):
+    yaw = yaw + 360
   #print(str(name),x, y, yaw)
   #print(str(name),int(x),int(y),round(yaw))
   rospy.loginfo('x:%d, y:%d, yaw:%d',int(x),int(y),int(yaw))
@@ -173,32 +176,52 @@ if __name__ == '__main__':
 
   #args = sys.argv #引数
   #status_csv = 'status' + args[1] + '.csv'
-  status_csv = 'groundtruth.csv'
+  status_csv = 'NNQL/groundtruth.csv'
   #scan_csv = 'scan' + args[1] + '.csv'
   f_status = open(status_csv,'w')
   #f_scan = open(scan_csv,'w')
-  action_list = ["frontier", "wall", "random"]
-  for j in range(10):
+  #qdata_path = '/home/chinourobot/catkin_ws/src/megarover_nnql/nnql/scripts/NNQL'
+  qdata_path = 'NNQL'
+  NNQL = NNQL_class(qdata_path) #NNQL
+  Qdatabase = NNQL.mk_Qdatabase(0,0) #Qデータベース作成
+  use_Qdatabase = Qdatabase #使用するデータベース
+  action_list = ["frontier", "wall", "random"] #行動集合
+  for j in range(50): #episode
     print("=======================================================================")
     p = call(['rosnode','kill','slam_gmapping'])
     #start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
     #start_yaw = np.random.randint(0, 361)
     start_x, start_y, start_yaw = start()
     set_model('vmegarover', start_x, start_y, 0, start_yaw)
-    rospy.loginfo('ep:%d, x:%d, y:%d, yaw:%d',j,start_x,start_y,start_yaw)
+    rospy.loginfo('%depisode',j)
     distance = 0
     get_status('vmegarover')
     scan = get_scan()
     now_state = get_rrf(scan)
     get_occupancy()
-    for i in range(4):
+    
+    env_list = []
+    eps = 1/(0.1*(j)+1) 
+    
+    for i in range(4): #step
       print("---------------------------------------------------------------------")
       rospy.loginfo('%dstep',i)
-      action_index = np.random.randint(0, 3)
-      #action_index = 1
-      action = action_list[action_index]
+      if not (j < 25 or eps>eps_random) :
+        q_average,knn_list = NNQL.knn(now_state,use_Qdatabase) #knn,now_state=クラス固有ベクトル
+        action_maxIndex = [i for i, x in enumerate(q_average) if x == max(q_average)]
+        action_index = random.choice(action_maxIndex) # action_index = max(q_avg)
+        action = action_list[action_index]
+      else:
+        q_average = list([0]*3)
+        action_index = np.random.randint(0, 3)
+        knn_list = None
+        action = action_list[action_index]
+
+      Qdatabase = NNQL.Q_data_add(now_state,q_average,Qdatabase)  #qデータベース追加
+      
       rospy.loginfo('action:%s',action)
-      if action == "frontier":
+
+      if action == "frontier": #行動選択
         frontier()
       elif action == "wall":
         wall()
@@ -207,10 +230,28 @@ if __name__ == '__main__':
       
       get_status('vmegarover')
       scan = get_scan()
-      now_state = get_rrf(scan)
+      next_state = get_rrf(scan) #行動後の状態
+      env_list.append([now_state,next_state,action_index,knn_list,q_average]) #結果保存
+      now_state = next_state
+      
       occupancy = get_occupancy()
       temp_dis = get_distance()
       distance = distance + temp_dis
-    rospy.loginfo('finish %depisode',j)
-    reward = get_reward(occupancy, distance)
 
+    reward = get_reward(occupancy, distance) #報酬
+    for env in env_list:
+      state = env[0]
+      state_next = env[1]
+      do_action = env[2]
+      knn_list_all = env[4]
+      q_list = env[5]
+      Qdatabase = NNQL.q_learning(state,state_next,do_action,reward,knn_list_all,q_list,Qdatabase) #q値更新 
+   
+    if episode%20 == 0: #1000>50
+      NNQL.save_Qdatabase(Qdatabase,episode,train) #Qdatabase保存
+
+    if episode%5 == 0:
+      use_Qdatabase = Qdatabase
+
+    #rospy.loginfo('finish %depisode',j)
+  NNQL.save_Qdatabase(Qdatabase,episode,train) #Qdatabase保存 
