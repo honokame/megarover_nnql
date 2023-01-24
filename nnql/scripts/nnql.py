@@ -22,8 +22,6 @@ from actionlib_msgs.msg import * #random()
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal #random()
 from learn import NNQL_class
 
-pos_start = [[0.5,2.3],[1.5,2.5],[4.2,2.5],[5.5,2.3],[6.5,2.2],[7.5,4.5],[8.5,5.7],[4.3,5.3]]
-
 def set_model(name, x, y, z, yaw): #指定位置にセット
   model_state = ModelState()
   model_state.model_name = name
@@ -69,8 +67,6 @@ def get_status(name):
   yaw = round(eular[2]*180/np.pi)
   if(yaw < 0):
     yaw = yaw + 360
-  #print(str(name),x, y, yaw)
-  #print(str(name),int(x),int(y),round(yaw))
   rospy.loginfo('x:%d, y:%d, yaw:%d',int(x),int(y),int(yaw))
   status = str(int(x)) + ',' + str(int(y)) + ',' + str(int(yaw)) + '\n'
   f_status.write(status)
@@ -78,8 +74,6 @@ def get_status(name):
 def get_scan():
   msg = rospy.wait_for_message('/scan', LaserScan)
   scan = msg.ranges
-  #writer = csv.writer(f_scan)
-  #writer.writerow(scan)
   return scan
 
 def wall():
@@ -181,8 +175,7 @@ if __name__ == '__main__':
   #scan_csv = 'scan' + args[1] + '.csv'
   f_status = open(status_csv,'w')
   #f_scan = open(scan_csv,'w')
-  #qdata_path = '/home/chinourobot/catkin_ws/src/megarover_nnql/nnql/scripts/NNQL'
-  qdata_path = 'NNQL'
+  qdata_path = 'NNQL/Qdatabase'
   episode = 1
   max_episode = 50
   step = 1
@@ -194,8 +187,6 @@ if __name__ == '__main__':
   while(episode < max_episode+1):
     print("=======================================================================")
     p = call(['rosnode','kill','slam_gmapping'])
-    #start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
-    #start_yaw = np.random.randint(0, 361)
     start_x, start_y, start_yaw = start()
     set_model('vmegarover', start_x, start_y, 0, start_yaw)
     rospy.loginfo('%depisode',episode)
@@ -210,6 +201,10 @@ if __name__ == '__main__':
     
     #for i in range(4): #step
     while(step < 5):
+      if episode%25 == 0:
+        map_num = str(episode)+'_0'
+        os.system('rosrun map_server map_saver -f NNQL/{}'.format(map_num))
+
       print("---------------------------------------------------------------------")
       rospy.loginfo('%dstep',step)
       eps_random = np.random.rand()
@@ -243,7 +238,10 @@ if __name__ == '__main__':
       
       occupancy = get_occupancy()
       temp_dis = get_distance()
-      distance = distance + temp_dis
+      distance = distance + temp_dis  
+      if episode%25 == 0:
+        map_num = str(episode)+'_'+str(step)
+        os.system('rosrun map_server map_saver -f NNQL/{}'.format(map_num))
       step = step+1
 
     reward = get_reward(occupancy, distance) #報酬
@@ -255,13 +253,13 @@ if __name__ == '__main__':
       q_list = env[4]
       Qdatabase = NNQL.q_learning(state,state_next,do_action,reward,knn_list_all,q_list,Qdatabase) #q値更新 
    
-    if episode%2 == 0: #1000>50
+    if episode%25 == 0: #1000>50
       NNQL.save_Qdatabase(Qdatabase,episode,0) #Qdatabase保存
 
-    if episode%5 == 0:
+    if episode%25 == 0:
       use_Qdatabase = Qdatabase
+
 
     episode = episode+1
     step = 1
-    #rospy.loginfo('finish %depisode',j)
   NNQL.save_Qdatabase(Qdatabase,episode,0) #Qdatabase保存 
