@@ -9,6 +9,7 @@ import sys #引数
 import os #ファイル読み書き
 import csv #リストをcsvに書き込み
 import feature_r9t12 as feature #特徴量計算
+import random
 from subprocess import *
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.srv import GetModelState
@@ -212,10 +213,10 @@ if __name__ == '__main__':
       print("---------------------------------------------------------------------")
       rospy.loginfo('%dstep',step)
       eps_random = np.random.rand()
-      if not (episode == 0 or eps>eps_random) :
+      if not (episode < 25 or eps>eps_random) :
         q_average,knn_list = NNQL.knn(now_state,use_Qdatabase) #knn,now_state=クラス固有ベクトル
         action_maxIndex = [i for i, x in enumerate(q_average) if x == max(q_average)]
-        action_index = random.choice(action_maxIndex) # action_index = max(q_avg)
+        action_index = np.random.choice(action_maxIndex) # action_index = max(q_avg)
         action = action_list[action_index]
       else:
         q_average = list([0]*3)
