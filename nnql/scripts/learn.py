@@ -12,8 +12,8 @@ from scipy.stats import rankdata
 
 
 class NNQL_class:
-   def __init__(self):
-       self.qdatabase_path = ""
+   def __init__(self,qdata_path):
+       self.qdatabase_path = qdata_path
 
    def mk_Qdatabase(self,episode,train):
         if episode == 0:
