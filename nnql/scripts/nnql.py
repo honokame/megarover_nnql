@@ -182,11 +182,12 @@ if __name__ == '__main__':
   #f_scan = open(scan_csv,'w')
   #qdata_path = '/home/chinourobot/catkin_ws/src/megarover_nnql/nnql/scripts/NNQL'
   qdata_path = 'NNQL'
+  episode = 50
   NNQL = NNQL_class(qdata_path) #NNQL
   Qdatabase = NNQL.mk_Qdatabase(0,0) #Qデータベース作成
   use_Qdatabase = Qdatabase #使用するデータベース
   action_list = ["frontier", "wall", "random"] #行動集合
-  for j in range(50): #episode
+  for j in range(episode): #episode
     print("=======================================================================")
     p = call(['rosnode','kill','slam_gmapping'])
     #start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
@@ -243,8 +244,8 @@ if __name__ == '__main__':
       state = env[0]
       state_next = env[1]
       do_action = env[2]
-      knn_list_all = env[4]
-      q_list = env[5]
+      knn_list_all = env[3]
+      q_list = env[4]
       Qdatabase = NNQL.q_learning(state,state_next,do_action,reward,knn_list_all,q_list,Qdatabase) #q値更新 
    
     if episode%20 == 0: #1000>50
