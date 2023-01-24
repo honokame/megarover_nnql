@@ -107,5 +107,5 @@ def shapecontext(scan):
   writer = csv.writer(f_file)
   writer.writerow(feature)
   #print(feature)
-  print('calc feature')
+  #print('calc feature')
   feature = []

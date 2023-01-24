@@ -113,7 +113,7 @@ probs_Y = torch.softmax(model(test_bg), 1)
 sampled_Y = torch.multinomial(probs_Y, 1)
 argmax_Y = torch.max(probs_Y, 1)[1].view(-1, 1)
 
-print(int(argmax_Y[0])+1) #場所クラス予測
+print('場所クラス予測:', str(int(argmax_Y[0])+1)) #場所クラス予測
 output = probs_Y.to('cpu').detach().numpy().copy() #クラス確率ベクトル
 rank = rankdata(-np.array(output[0]))
 rrf = np.reciprocal(rank) #逆ランクベクトル
