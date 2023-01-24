@@ -182,19 +182,22 @@ if __name__ == '__main__':
   #f_scan = open(scan_csv,'w')
   #qdata_path = '/home/chinourobot/catkin_ws/src/megarover_nnql/nnql/scripts/NNQL'
   qdata_path = 'NNQL'
-  episode = 50
+  episode = 1
+  max_episode = 50
+  step = 1
   NNQL = NNQL_class(qdata_path) #NNQL
-  Qdatabase = NNQL.mk_Qdatabase(0,0) #Qデータベース作成
+  Qdatabase = NNQL.mk_Qdatabase(episode,0) #Qデータベース作成
   use_Qdatabase = Qdatabase #使用するデータベース
   action_list = ["frontier", "wall", "random"] #行動集合
-  for j in range(episode): #episode
+  #for j in range(episode): #episode
+  while(episode < max_episode+1):
     print("=======================================================================")
     p = call(['rosnode','kill','slam_gmapping'])
     #start_x, start_y = pos_start[np.random.randint(0, len(pos_start))]
     #start_yaw = np.random.randint(0, 361)
     start_x, start_y, start_yaw = start()
     set_model('vmegarover', start_x, start_y, 0, start_yaw)
-    rospy.loginfo('%depisode',j)
+    rospy.loginfo('%depisode',episode)
     distance = 0
     get_status('vmegarover')
     scan = get_scan()
@@ -202,12 +205,14 @@ if __name__ == '__main__':
     get_occupancy()
     
     env_list = []
-    eps = 1/(0.1*(j)+1) 
+    eps = 1/(0.1*(episode)+1) 
     
-    for i in range(4): #step
+    #for i in range(4): #step
+    while(step < 5):
       print("---------------------------------------------------------------------")
-      rospy.loginfo('%dstep',i)
-      if not (j < 25 or eps>eps_random) :
+      rospy.loginfo('%dstep',step)
+      eps_random = np.random.random()
+      if not (episode == 0 or eps>eps_random) :
         q_average,knn_list = NNQL.knn(now_state,use_Qdatabase) #knn,now_state=クラス固有ベクトル
         action_maxIndex = [i for i, x in enumerate(q_average) if x == max(q_average)]
         action_index = random.choice(action_maxIndex) # action_index = max(q_avg)
@@ -238,6 +243,7 @@ if __name__ == '__main__':
       occupancy = get_occupancy()
       temp_dis = get_distance()
       distance = distance + temp_dis
+      step = step+1
 
     reward = get_reward(occupancy, distance) #報酬
     for env in env_list:
@@ -248,11 +254,13 @@ if __name__ == '__main__':
       q_list = env[4]
       Qdatabase = NNQL.q_learning(state,state_next,do_action,reward,knn_list_all,q_list,Qdatabase) #q値更新 
    
-    if episode%20 == 0: #1000>50
-      NNQL.save_Qdatabase(Qdatabase,episode,train) #Qdatabase保存
+    if episode%2 == 0: #1000>50
+      NNQL.save_Qdatabase(Qdatabase,episode,0) #Qdatabase保存
 
     if episode%5 == 0:
       use_Qdatabase = Qdatabase
 
+    episode = episode+1
+
     #rospy.loginfo('finish %depisode',j)
-  NNQL.save_Qdatabase(Qdatabase,episode,train) #Qdatabase保存 
+  NNQL.save_Qdatabase(Qdatabase,episode,0) #Qdatabase保存 
