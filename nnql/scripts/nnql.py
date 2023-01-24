@@ -261,6 +261,6 @@ if __name__ == '__main__':
       use_Qdatabase = Qdatabase
 
     episode = episode+1
-
+    step = 1
     #rospy.loginfo('finish %depisode',j)
   NNQL.save_Qdatabase(Qdatabase,episode,0) #Qdatabase保存 
