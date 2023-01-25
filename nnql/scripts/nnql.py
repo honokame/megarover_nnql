@@ -201,12 +201,12 @@ if __name__ == '__main__':
     env_list = []
     eps = 1/(0.1*(episode)+1) 
     
-    #for i in range(4): #step
-    while(step < 5):
-      if episode%25 == 0:
+    if episode%25 == 0:
         map_num = str(episode)+'_0'
         os.system('rosrun map_server map_saver -f NNQL/{}'.format(map_num))
 
+    #for i in range(4): #step
+    while(step < 5):
       print("---------------------------------------------------------------------")
       rospy.loginfo('%dstep',step)
       eps_random = np.random.rand()
