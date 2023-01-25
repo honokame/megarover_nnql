@@ -73,7 +73,11 @@ def shapecontext(scan):
       else:
         tmp_theta = 12
     
-      tmp_dis = int(tmp_d)+1
+      if(str(tmp_d) == "inf"):
+        tmp_dis = 100
+      else:
+        tmp_dis = int(tmp_d)+1
+
       if (tmp_dis == 1):
         tmp_b = tmp_theta * 9-8
       elif (tmp_dis == 2):
