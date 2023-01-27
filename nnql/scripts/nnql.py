@@ -178,11 +178,11 @@ if __name__ == '__main__':
   result_csv = 'NNQL/result.csv'
   f_result = open(result_csv,'w')
   qdata_path = 'NNQL/Qdatabase'
-  episode = 1
+  episode = 901
   max_episode = 100000
   step = 1
   NNQL = NNQL_class(qdata_path) #NNQL
-  Qdatabase = NNQL.mk_Qdatabase(episode,0) #Qデータベース作成
+  Qdatabase = NNQL.mk_Qdatabase(episode-1,0) #Qデータベース作成
   use_Qdatabase = Qdatabase #使用するデータベース
   action_list = ["frontier", "wall", "random"] #行動集合
   #for j in range(episode): #episode
