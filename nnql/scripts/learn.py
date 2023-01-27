@@ -15,7 +15,7 @@ class NNQL_class:
    def __init__(self,qdata_path):
        self.qdatabase_path = qdata_path
 
-   def mk_Qdatabase(self,episode,train):
+   def mk_Qdatabase(self,episode):
         if episode == 1:
             Qdatabase = {} #{state:Qdata}
         else:
