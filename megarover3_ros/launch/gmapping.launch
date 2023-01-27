@@ -99,6 +99,7 @@ SLAM（gmapping）サンプルのlaunch
     <param name="ymax" value="30" type="double" />
     <param name="xmin" value="-30" type="double" />
     <param name="ymin" value="-30" type="double" />
+    <param name="base_frame" value="base_link"/>
     <!-- param name="map_update_interval" value="1" /-->
 </node>
 
