@@ -30,7 +30,7 @@ namespace rrtstar_planner{
       };
 
       vector<rrtNode> getTree();
-      vector<rrtNode> getNearestNeighbor(int tempNodeID);//这一行是新加的
+      vector<rrtNode> getNearestNeighbor(int tempNodeID);//新しく追加した関数
       void setTree(vector<rrtNode> input_rrtTree);
       int getTreeSize();
 
@@ -169,13 +169,12 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       return rrtTree;
     }
 
-    vector<RRT::rrtNode> RRT::getNearestNeighbor(int tempNodeID){//不要忘记补头文件；目的是在一定范围内找到新节点附近的近邻节点
+    vector<RRT::rrtNode> RRT::getNearestNeighbor(int tempNodeID){//特定の範囲内で新しいノードの最も近い隣人を見つける
       double win_r=0.15;
       vector<RRT::rrtNode> rrtNeighbor;
       for(int i=0;i<getTreeSize();i++){
-        if ( getEuclideanDistance(getPosX(tempNodeID),getPosY(tempNodeID),getPosX(i),getPosY(i))<=win_r){//新节点和每一个节点
-          //这里应该是一个专门用来存储近邻节点的向量 
-          rrtNeighbor.push_back(getNode(i));
+        if ( getEuclideanDistance(getPosX(tempNodeID),getPosY(tempNodeID),getPosX(i),getPosY(i))<=win_r){//新しいノードとすべてのノード
+          rrtNeighbor.push_back(getNode(i)); //隣接ノードを格納するための配列
         }   
       }
       return rrtNeighbor;
@@ -280,10 +279,10 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
     vector<int> RRT::getRootToEndPath(int endNodeID){
       vector<int> path;
       path.push_back(endNodeID);
-      while(rrtTree[path.front()].nodeID != 0){//path.front()返回的是ID
+      while(rrtTree[path.front()].nodeID != 0){//path.front()はIDを返す
         //std::cout<<rrtTree[path.front()].nodeID<<endl;
-        path.insert(path.begin(),rrtTree[path.front()].parentID);//这里的ID有问题导致循环跳不出去
-        //path.begin()是最后一个新节点的ID，随后插入的是前一个节点的父节点
+        path.insert(path.begin(),rrtTree[path.front()].parentID);//ここのIDに問題があり、ループが飛び出している?
+        //path.begin()は最後の新しいノードのID、その後に挿入されるノードの親ノード
       }
       return path;
     }
@@ -291,7 +290,8 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
     void RRT::initializeMarkers(visualization_msgs::Marker &sourcePoint,
         visualization_msgs::Marker &goalPoint,visualization_msgs::Marker &randomPoint,
         visualization_msgs::Marker &rrtTreeMarker,visualization_msgs::Marker &rrtTreeMarker1,
-        visualization_msgs::Marker &rrtTreeMarker2,visualization_msgs::Marker &finalPath){//对于RRT*的标记来说，添加新的即可
+        visualization_msgs::Marker &rrtTreeMarker2,visualization_msgs::Marker &finalPath){//新しいタグを追加するだけでいい、rvizの話?
+      
       //init headers
       sourcePoint.header.frame_id    = goalPoint.header.frame_id    = randomPoint.header.frame_id    = rrtTreeMarker.header.frame_id    = rrtTreeMarker1.header.frame_id    = rrtTreeMarker2.header.frame_id    =finalPath.header.frame_id    = "map";
       sourcePoint.header.stamp       = goalPoint.header.stamp       = randomPoint.header.stamp       = rrtTreeMarker.header.stamp       = rrtTreeMarker1.header.stamp       = rrtTreeMarker2.header.stamp       =finalPath.header.stamp       = ros::Time::now();
@@ -305,7 +305,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       randomPoint.id    = 2;
       rrtTreeMarker.id  = 3;
       finalPath.id      = 4;
-      rrtTreeMarker1.id = 5;//这一行是新加的
+      rrtTreeMarker1.id = 5;//新しく追加した
       rrtTreeMarker2.id = 6;
 
       //defining types
@@ -371,7 +371,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);
       RRT::rrtNode nearestNode = getNode(nearestNodeID);
 
-      double theta = atan2(tempNode.posY - nearestNode.posY,tempNode.posX - nearestNode.posX);//这个角度意义不对
+      double theta = atan2(tempNode.posY - nearestNode.posY,tempNode.posX - nearestNode.posX);//この角度意味不明?、使ってないかも
       vector<double> n1,n2;
       if(nearestNode.parentID==0){
         n1.push_back(tempNode.posX - nearestNode.posX);
@@ -390,25 +390,24 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
     }
 
     bool RRT::addNewPointtoRRT(RRT::rrtNode &tempNode, double rrtStepSize){
-      int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);//由此启发：是否可以写一个myRRT.getNearestNeighbor?具体函数写在rrt.cpp中
+      int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);//触発された、myrrt.で書くことは可能か?、特定の関数はrrt.cppに書かれてる
 
-      RRT::rrtNode nearestNode = getNode(nearestNodeID);//这里getNode 获得的节点是一个结构体包含很多信息
+      RRT::rrtNode nearestNode = getNode(nearestNodeID);//getNodeで多くの情報を含む構造体を取得
 
       double theta = atan2(tempNode.posY - nearestNode.posY,tempNode.posX - nearestNode.posX);
 
-      //出现问题是因为如果不满足该条件，没有后续动作会强行链接上一次存储在Marker中的值
-      tempNode.posX = nearestNode.posX + (rrtStepSize * cos(theta));//这里tempNode变成了新节点
+      //if(theta<=PI/4)条件が満たされなかった場合、マーカーの値をリンクするアクションがないため問題が発生する
+      tempNode.posX = nearestNode.posX + (rrtStepSize * cos(theta));//tempNodeが新しいノードになる
       tempNode.posY = nearestNode.posY + (rrtStepSize * sin(theta));
 
       if(checkIfInsideBoundary(tempNode) && checkIfOutsideObstacles(tempNode)){//checkIfOutsideObstacles(obstArray,tempNode))
         tempNode.parentID = nearestNodeID;
         tempNode.nodeID = rrtTree.size();
-        //这里tempNode表示新节点，今后RRT×的操作就基于这个新节点
+        //myRRT.addNewNode(tenpNode);//tempNodeは新しいノード、RRTはこのノードで行われる
         tempNode.cost=sqrt(pow(nearestNode.posX - tempNode.posX,2) + pow(nearestNode.posY - tempNode.posY,2))+\
-                      nearestNode.cost;//计算每个新节点的代价,私有成员不能随意调用
-        //std::cout<<"tempNode.cost= "<<tempNode.cost<<endl;//////////////////////////////////////////
+                      nearestNode.cost;//新しいノードごとにコストを計算、プライベートメンバーは自由に呼び出せない
+        //std::cout<<"tempNode.cost= "<<tempNode.cost<<endl;
         //std::cout<<"tempNode.posX: "<<tempNode.posX<<"  tempNode.posY"<<tempNode.posY<<endl;
-        //这里tempNode表示新节点，今后RRT×的操作就基于这个新节点
         rrtTree.push_back(tempNode);
 
         return true;
@@ -438,12 +437,10 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
         return false;
     }
 
-    void RRT::addBranchtoRRTTree(visualization_msgs::Marker &rrtTreeMarker, RRT::rrtNode &tempNode){//针对RRT*来说另外写一个函数
-      //这个函数实际上就是画图
-
+    void RRT::addBranchtoRRTTree(visualization_msgs::Marker &rrtTreeMarker, RRT::rrtNode &tempNode){//RRT用の別の関数を作成、描画に使用
       geometry_msgs::Point point;
 
-      point.x = tempNode.posX;//这里的tempNode 是新生成的节点
+      point.x = tempNode.posX;//tempNodeは新しく生成されたノード
       point.y = tempNode.posY;
       point.z = 0;
       rrtTreeMarker.points.push_back(point);
@@ -454,13 +451,13 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       point.y = parentNode.posY;
       point.z = 0;
 
-      rrtTreeMarker.points.push_back(point);//之所以把新生成的节点和其父节点都加入到rrtTreeMarker，是因为visualization_msgs::Marker LINE_LIST 的性质，链接两个新加入的节点
+      rrtTreeMarker.points.push_back(point);//新しく生成されたノードと親ノードを追加、新しいノードをリンクする
     }
 
     void RRTStarprocess1(visualization_msgs::Marker &rrtTreeMarker1, RRT::rrtNode &q_min,RRT::rrtNode &tempNode){
       geometry_msgs::Point point;
 
-      point.x = tempNode.posX;//这里的tempNode 是新生成的节点
+      point.x = tempNode.posX;//tenpNodeは新しく生成されたノード
       point.y = tempNode.posY;
       point.z = 0;
       rrtTreeMarker1.points.push_back(point);
@@ -487,7 +484,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
 
     bool RRT::checkNodetoGoal(double X, double Y, RRT::rrtNode &tempNode){
       double distance = sqrt(pow(X-tempNode.posX,2)+pow(Y-tempNode.posY,2));
-      //std::cout<<"距离终点的距离： "<<distance<<endl;
+      //std::cout<<"終点からの距離： "<<distance<<endl; //
       if(distance < 0.05){
         return true;
       }
@@ -536,7 +533,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
 
       RRT::rrtNode newNode;
 
-      initNode(newNode,start);//初始化节点
+      initNode(newNode,start);//ノードの初期化
 
       double rrtStepSize = 0.05;//
 
@@ -568,18 +565,18 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
 
           if(addNodeResult){
             //std::cout<<"tempnode accepted"<<endl;
-            addBranchtoRRTTree(rrtTreeMarker,tempNode);//RRT*应该是写在这一行的下一行（先确确实实的加入了新节点，才能由新节点找近邻节点）
+            addBranchtoRRTTree(rrtTreeMarker,tempNode);//エラーが発生した場合は、tenpNodeが新しいノードか確認する
             //std::cout<<"tempnode printed"<<endl;
 
-            //RRT*核心部分
-            //由此启发：是否可以写一个myRRT.getNearestNeighbor?具体函数写在rrt.cpp中
-            //重选父节点过程
-            vector<RRT::rrtNode> rrtNeighbor=getNearestNeighbor(tempNode.nodeID);//如果出错，确认这里的tempNode是否是新生成的节点，以及赋值语句的正确性
+            //RRT*プログラム
+            //触発された、myrrt.で書くことは可能か?、特定の関数はrrt.cppに書かれてる
+            //親ノードのプロセスを再選択
+            vector<RRT::rrtNode> rrtNeighbor=getNearestNeighbor(tempNode.nodeID);//エラーが発生した場合は、tenpNodeが新しいノードか確認する
             //std::cout<<"rrtNeighbor.size= "<<rrtNeighbor.size()<<endl;///////////////////////////////////////////////
             int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);
             RRT::rrtNode nearestNode = getNode(nearestNodeID);
             RRT::rrtNode q_min=nearestNode;
-            double C_min=tempNode.cost;//！！！注意之前还没有任何关于cost的操作,tempNode.cost
+            double C_min=tempNode.cost;//tempNode.costの前にコストに対する操作がないことに注意
             for(int k=0;k<rrtNeighbor.size();k++){
               if(checkIfInsideBoundary(rrtNeighbor[k]) && checkIfOutsideObstacles(rrtNeighbor[k])\
                   &&rrtNeighbor[k].cost+\
@@ -589,26 +586,26 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
                         caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY);
               }
             }
-            RRTStarprocess1(rrtTreeMarker1,q_min,tempNode);//这里仿照addBranchtoRRTTree写一个新的划线函数,rrtTreeMarker1是新的标记
+            RRTStarprocess1(rrtTreeMarker1,q_min,tempNode);//addBranchtoRRTTreeのような新しい関数を追加、rrtTreeMarker1は新しいマーカー
             tempNode.cost=C_min;
 
-            //找到问题的原因是：有时候parentID等于nodeID
+            //問題の原因：parentIDとnodeIDが等しい場合がある
             if(tempNode.nodeID!=q_min.nodeID)
-              tempNode.parentID=q_min.nodeID;//RRT*第一过程核心，重选父节点////////////////////////
+              tempNode.parentID=q_min.nodeID;//RRT*の最初のプロセス、親ノードを再選択
 
             rrtTree.pop_back();
-            rrtTree.push_back(tempNode);//这里tempNode表示新节点，今后RRT×的操作就基于这个新节点
+            rrtTree.push_back(tempNode);//tempNodeは新しいノード、RRTはこのノードで行われる
             //std::cout<<"tempNode.nodeID: "<<tempNode.nodeID<<"    tempNode.parentID: "<<tempNode.parentID<<endl;
 
-            //重布线过程
-            //没有必要重新再找临近节点了，因为每针对一个新节点，在上一过程已经找到了临近节点
+            //再敗戦処理
+            //新しいノードごとに隣接ノードは前のプロセスで検出されているため、隣接ノードを再度検出する必要はない
             RRT::rrtNode q_min1=nearestNode;
             double C_min1=tempNode.cost+caldistance(q_min.posX,q_min.posY,tempNode.posX,tempNode.posY);
 
             for(int k=0;k<rrtNeighbor.size();k++){
               if(checkIfInsideBoundary(rrtNeighbor[k]) && checkIfOutsideObstacles(rrtNeighbor[k])\
                   &&(tempNode.cost+caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY))\
-                  < rrtNeighbor[k].cost){//在这个过程中只有当rrtNeighbor==tempNode时才满足条件，因此才会出现q_min1==tempNode的情况
+                  < rrtNeighbor[k].cost){//rrtNeighbor==tempNodeのときのみ、q_min1==tempNodeが発生
                 q_min1=rrtNeighbor[k];
                 C_min1=tempNode.cost+\
                        caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY);
@@ -617,12 +614,12 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
               }
             }
             RRTStarprocess2(rrtTreeMarker2,q_min1,tempNode);
-            //判断终止
+            //判定終了
             nodeToGoal = checkNodetoGoal(goalX, goalY,tempNode);
-            //std::cout<<"nodeToGoal的值： "<<nodeToGoal<<endl;
+            //std::cout<<"nodeToGoal： "<<nodeToGoal<<endl;
             if(nodeToGoal){
-              //std::cout<<"最后一个点的ID： "<<tempNode.nodeID<<endl;
-              path = getRootToEndPath(tempNode.nodeID);//path向量是一个包含组成最终路径的节点ID的向量,这里没有goal的ID
+              //std::cout<<"最後のポイントのID： "<<tempNode.nodeID<<endl;
+              path = getRootToEndPath(tempNode.nodeID);//pathは最終的なパスを構成するノードIDをすべて含む配列、ゴールIDはない
               rrtPaths.push_back(path);
               //std::cout<<"New Path Found. Total paths "<<rrtPaths.size()<<endl;
               int i=0;
@@ -649,7 +646,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
               shortestPathLength = rrtPaths[i].size();
             }
           }
-          setFinalPathData(rrtPaths, shortestPath, finalPath, goalX, goalY);//该函数的作用是画出路径
+          setFinalPathData(rrtPaths, shortestPath, finalPath, goalX, goalY);//パスの描画
           rrt_publisher.publish(finalPath);
           return  true;
         }
