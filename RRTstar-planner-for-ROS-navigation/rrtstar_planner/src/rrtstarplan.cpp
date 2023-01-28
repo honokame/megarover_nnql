@@ -26,7 +26,6 @@ namespace rrtstar_planner{
         double posY;
         int parentID;
         double cost;
-        //double theta;
         vector<int> children;
       };
 
@@ -56,7 +55,6 @@ namespace rrtstar_planner{
       vector<int> getRootToEndPath(int endNodeID);
 
       bool judgeangle1(RRT myRRT, rrtNode tempNode);
-      //bool judgeangle2(rrtNode rrtNeighbor,int NeighborParent,int NeighborID,rrtNode tempNode,int tempNodeID);
 
       void initializeMarkers(visualization_msgs::Marker &sourcePoint,
           visualization_msgs::Marker &goalPoint,
@@ -290,25 +288,6 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       return path;
     }
 
-    /*
-       bool RRT::judgeangle2(RRT::rrtNode rrtNeighbor,int NeighborParent, int NeighborID, RRT::rrtNode tempNode,int tempNodeID){
-       vector<double> n1,n2;
-       n1.clear();n2.clear();
-       if(NeighborParent==0){
-       n1.push_back(getPosX(tempNodeID) - getPosX(NeighborID));
-       n1.push_back(getPosY(tempNodeID) - getPosY(NeighborID));
-       n2.push_back(0.0001);
-       n2.push_back(0.0001);
-       }else{
-       n1.push_back(getPosX(NeighborID)-getPosX(NeighborParent));
-       n1.push_back(getPosY(NeighborID)-getPosY(NeighborParent));
-       n2.push_back(getPosX(tempNodeID)-getPosX(NeighborID));
-       n2.push_back(getPosY(tempNodeID)-getPosY(NeighborID));
-       }
-       double phy=acos((n1[0]*n2[0]+n1[1]*n2[1])/sqrt((pow(n1[0],2)+pow(n1[1],2))*(pow(n2[0],2)+pow(n2[1],2))));
-       return (abs(phy)<=PI/6) ? true : false;
-       }*/
-
     void RRT::initializeMarkers(visualization_msgs::Marker &sourcePoint,
         visualization_msgs::Marker &goalPoint,visualization_msgs::Marker &randomPoint,
         visualization_msgs::Marker &rrtTreeMarker,visualization_msgs::Marker &rrtTreeMarker1,
@@ -381,8 +360,6 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       }else{
         double x = double(rand())/double(RAND_MAX)*(maxx - minx) + minx;
         double y = double(rand())/double(RAND_MAX)*(maxy - miny) + miny;
-        //int x = rand() % maxx ;
-        //int y = rand() % maxy ;
         //std::cout<<"Random X: "<<x <<endl<<"Random Y: "<<y<<endl;
         tempNode.posX = x;
         tempNode.posY = y;
@@ -413,26 +390,25 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
     }
 
     bool RRT::addNewPointtoRRT(RRT::rrtNode &tempNode, double rrtStepSize){
-      //addNewPointtoRRT(RRT &myRRT, RRT::rrtNode &tempNode, int rrtStepSize, vector< vector<geometry_msgs::Point> > &obstArray)//传进该函数中的tempNode是随机点
       int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);//由此启发：是否可以写一个myRRT.getNearestNeighbor?具体函数写在rrt.cpp中
 
       RRT::rrtNode nearestNode = getNode(nearestNodeID);//这里getNode 获得的节点是一个结构体包含很多信息
 
       double theta = atan2(tempNode.posY - nearestNode.posY,tempNode.posX - nearestNode.posX);
 
-      //if(theta<=PI/4)//出现问题是因为如果不满足该条件，没有后续动作会强行链接上一次存储在Marker中的值
+      //出现问题是因为如果不满足该条件，没有后续动作会强行链接上一次存储在Marker中的值
       tempNode.posX = nearestNode.posX + (rrtStepSize * cos(theta));//这里tempNode变成了新节点
       tempNode.posY = nearestNode.posY + (rrtStepSize * sin(theta));
 
       if(checkIfInsideBoundary(tempNode) && checkIfOutsideObstacles(tempNode)){//checkIfOutsideObstacles(obstArray,tempNode))
         tempNode.parentID = nearestNodeID;
         tempNode.nodeID = rrtTree.size();
-        //myRRT.addNewNode(tempNode);//这里tempNode表示新节点，今后RRT×的操作就基于这个新节点
+        //这里tempNode表示新节点，今后RRT×的操作就基于这个新节点
         tempNode.cost=sqrt(pow(nearestNode.posX - tempNode.posX,2) + pow(nearestNode.posY - tempNode.posY,2))+\
                       nearestNode.cost;//计算每个新节点的代价,私有成员不能随意调用
         //std::cout<<"tempNode.cost= "<<tempNode.cost<<endl;//////////////////////////////////////////
         //std::cout<<"tempNode.posX: "<<tempNode.posX<<"  tempNode.posY"<<tempNode.posY<<endl;
-        // rrtTree.push_back(tempNode);//这里tempNode表示新节点，今后RRT×的操作就基于这个新节点
+        //这里tempNode表示新节点，今后RRT×的操作就基于这个新节点
         rrtTree.push_back(tempNode);
 
         return true;
@@ -573,7 +549,6 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
 
       RRT::rrtNode tempNode;
 
-      //vector< vector<geometry_msgs::Point> >  obstacleList = getObstacles();
       bool addNodeResult = false, nodeToGoal = false;
       std::cout<<"start: "<<start.pose.position.x<<"  "<<start.pose.position.y<<endl;
       std::cout<<"goal: "<<goal.pose.position.x<<"  "<<goal.pose.position.y<<endl;
@@ -592,9 +567,9 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
           addNodeResult = addNewPointtoRRT(tempNode,rrtStepSize);//addNewPointtoRRT(myRRT,tempNode,rrtStepSize,obstacleList);
 
           if(addNodeResult){
-            // std::cout<<"tempnode accepted"<<endl;
+            //std::cout<<"tempnode accepted"<<endl;
             addBranchtoRRTTree(rrtTreeMarker,tempNode);//RRT*应该是写在这一行的下一行（先确确实实的加入了新节点，才能由新节点找近邻节点）
-            // std::cout<<"tempnode printed"<<endl;
+            //std::cout<<"tempnode printed"<<endl;
 
             //RRT*核心部分
             //由此启发：是否可以写一个myRRT.getNearestNeighbor?具体函数写在rrt.cpp中
@@ -609,11 +584,9 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
               if(checkIfInsideBoundary(rrtNeighbor[k]) && checkIfOutsideObstacles(rrtNeighbor[k])\
                   &&rrtNeighbor[k].cost+\
                   caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY)<C_min){
-                //if(myRRT.judgeangle(rrtNeighbor[k],rrtNeighbor[k].parentID,rrtNeighbor[k].nodeID,tempNode,tempNode.nodeID)){
                 q_min = rrtNeighbor[k];
                 C_min = rrtNeighbor[k].cost+\
                         caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY);
-                //}
               }
             }
             RRTStarprocess1(rrtTreeMarker1,q_min,tempNode);//这里仿照addBranchtoRRTTree写一个新的划线函数,rrtTreeMarker1是新的标记
@@ -625,7 +598,6 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
 
             rrtTree.pop_back();
             rrtTree.push_back(tempNode);//这里tempNode表示新节点，今后RRT×的操作就基于这个新节点
-            //std::cout<<"x坐标和y坐标"<<myRRT.getNode(tempNode.nodeID).posX<<" , "<<myRRT.getNode(tempNode.nodeID).posY<<endl;
             //std::cout<<"tempNode.nodeID: "<<tempNode.nodeID<<"    tempNode.parentID: "<<tempNode.parentID<<endl;
 
             //重布线过程
@@ -637,13 +609,11 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
               if(checkIfInsideBoundary(rrtNeighbor[k]) && checkIfOutsideObstacles(rrtNeighbor[k])\
                   &&(tempNode.cost+caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY))\
                   < rrtNeighbor[k].cost){//在这个过程中只有当rrtNeighbor==tempNode时才满足条件，因此才会出现q_min1==tempNode的情况
-                //if(myRRT.judgeangle(tempNode,tempNode.parentID,tempNode.nodeID,rrtNeighbor[k],rrtNeighbor[k].nodeID)){//路径绕不出去的原因在这个角度判断条件
                 q_min1=rrtNeighbor[k];
                 C_min1=tempNode.cost+\
                        caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY);
                 if(q_min1.nodeID!=tempNode.nodeID)
                   setParentID(q_min1.nodeID, tempNode.nodeID);
-                //}
               }
             }
             RRTStarprocess2(rrtTreeMarker2,q_min1,tempNode);
@@ -654,7 +624,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
               //std::cout<<"最后一个点的ID： "<<tempNode.nodeID<<endl;
               path = getRootToEndPath(tempNode.nodeID);//path向量是一个包含组成最终路径的节点ID的向量,这里没有goal的ID
               rrtPaths.push_back(path);
-              std::cout<<"New Path Found. Total paths "<<rrtPaths.size()<<endl;
+              //std::cout<<"New Path Found. Total paths "<<rrtPaths.size()<<endl;
               int i=0;
               do{
                 geometry_msgs::PoseStamped pose=start;
@@ -666,7 +636,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
               }while(path[i]!=tempNode.nodeID);
               plan.push_back(goal);
               //ros::Duration(10).sleep();
-              //std::cout<<"got Root Path"<<endl;
+              std::cout<<"got Root Path"<<endl;
             }
           }
         }else{ //if(rrtPaths.size() >= rrtPathLimit)
