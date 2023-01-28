@@ -123,8 +123,10 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
     bool status=running;
 
     using namespace std;
-    using costmap_2d::NO_INFORMATION;
+    using costmap_2d::NO_INFORMATION; 
     using costmap_2d::FREE_SPACE;
+    using costmap_2d::INSCRIBED_INFLATED_OBSTACLE;
+    using costmap_2d::LETHAL_OBSTACLE;
 
     RRT::RRT(){ //はじめに実行、initializeを呼び出す
       ROS_INFO("init1");
@@ -132,16 +134,16 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
 
     RRT::RRT(std::string name, costmap_2d::Costmap2DROS* costmap_ros){ //呼び出されない 
       initialize(name, costmap_ros);
-      ROS_INFO("init2");
+      ROS_INFO("init0");
     }
 
     void RRT::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros){
-      ROS_INFO("init3");
-      rrt_publisher = pn.advertise<visualization_msgs::Marker> ("path_planner_rrt",1000);
+      ROS_INFO("init2");
+      rrt_publisher = pn.advertise<visualization_msgs::Marker> ("path_planner_rrt",1000); //マーカーのPublisher
       if(!initialized_){
-        costmap_ros_ = costmap_ros; //initialize the costmap_ros_ attribute to the parameter.
-        costmap_ = costmap_ros_->getCostmap(); //get the costmap_ from costmap_ros_
-        footprint = costmap_ros_->getRobotFootprint();
+        costmap_ros_ = costmap_ros; //costmap_ros_の初期化
+        costmap_ = costmap_ros_->getCostmap(); //すべてのレイヤーのcostmap_rosの更新を受け取る
+        footprint = costmap_ros_->getRobotFootprint(); //ロボットの現在のフットプリントを取得
 
         // initialize other planner parameters
         /*ros::NodeHandle private_nh("~/" + name);
@@ -154,9 +156,10 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       }
     }
 
+    //ノードの初期化、はじめのノードを現在位置にし、rrtTreeに追加
     void RRT::initNode(RRT::rrtNode &newNode, const geometry_msgs::PoseStamped& start){
       ROS_INFO("init4");
-      newNode.posX=start.pose.position.x;
+      newNode.posX=start.pose.position.x; //現在位置
       newNode.posY=start.pose.position.y;
       newNode.parentID = 0;
       newNode.nodeID = 0;
@@ -348,11 +351,11 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
 
     void RRT::generateTempPoint(RRT::rrtNode &tempNode,double goalX, double goalY,costmap_2d::Costmap2D* costmap_){
       float probability=0.2;
+      //地図の大きさを設定、地図の大きさ-地図の原点
       double maxx = costmap_->getSizeInMetersX() - costmap_->getOriginX();
       double minx = costmap_->getOriginX();
       double maxy = costmap_->getSizeInMetersY() - costmap_->getOriginY();
       double miny = costmap_->getOriginY();
-
       if (rand()/double(RAND_MAX)<probability){
         tempNode.posX=goalX;
         tempNode.posY=goalY;
@@ -513,12 +516,13 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       return sqrt(pow(destinationX - sourceX,2) + pow(destinationY - sourceY,2));
     }
     
+    //ゴールが送信されると実行する
     bool RRT::makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,  std::vector<geometry_msgs::PoseStamped>& plan ){
-      ROS_INFO("init5");
-      plan.clear();
-      rrtTree.clear();
+      ROS_INFO("init3");
+      plan.clear();//パスの初期化
+      rrtTree.clear();//rrtTreeの初期化
 
-      //defining markers
+      //描画用のマーカーを定義
       visualization_msgs::Marker sourcePoint;
       visualization_msgs::Marker goalPoint;
       visualization_msgs::Marker randomPoint;
@@ -527,42 +531,49 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       visualization_msgs::Marker rrtTreeMarker2;
       visualization_msgs::Marker finalPath;
 
+      //マーカーの初期化
       initializeMarkers(sourcePoint, goalPoint, randomPoint, rrtTreeMarker, rrtTreeMarker1, rrtTreeMarker2, finalPath);
 
-      srand(time(NULL));
+      srand(time(NULL)); //乱数の種を生成、毎回ランダムに行うため
 
-      RRT::rrtNode newNode;
+      RRT::rrtNode newNode; //newNodeという構造体を生成 
+      /*
+       int nodeID
+       double posX
+       double posY
+       int parentID
+       double cost
+       vector<int> children
+       */
 
-      initNode(newNode,start);//ノードの初期化
+      initNode(newNode,start);//ノードの初期化、現在位置をはじめのノードとし、rrtTreeに追加
 
-      double rrtStepSize = 0.05;//
+      double rrtStepSize = 0.2;//一回で伸ばすパスの長さ
 
-      vector< vector<int> > rrtPaths;
+      vector< vector<int> > rrtPaths; //二次元配列、最終パス
       vector<int> path;
       int rrtPathLimit = 1;
 
-      int shortestPathLength = 9999;
-      int shortestPath = -1;
+      int shortestPathLength = 9999; //9999
+      int shortestPath = -1; //-1
 
-      RRT::rrtNode tempNode;
+      RRT::rrtNode tempNode; //newNodeと同じような構造体生成
 
       bool addNodeResult = false, nodeToGoal = false;
-      std::cout<<"start: "<<start.pose.position.x<<"  "<<start.pose.position.y<<endl;
+      std::cout<<"start: "<<start.pose.position.x<<"  "<<start.pose.position.y<<endl; //現在位置とゴールを出力
       std::cout<<"goal: "<<goal.pose.position.x<<"  "<<goal.pose.position.y<<endl;
       status=running;
-      while(ros::ok() && status){
+      while(ros::ok() && status){ //ループ
         double goalX=goal.pose.position.x;
         double goalY=goal.pose.position.y;
-        if(rrtPaths.size() < rrtPathLimit){
+        if(rrtPaths.size() < rrtPathLimit){ //最終パスがないとき
           do{
             generateTempPoint(tempNode,goalX,goalY,costmap_);
             //std::cout<<"tempnode generated"<<endl;
             judgeangle1(tempNode);
           }
           while(!judgeangle1(tempNode));
-
           addNodeResult = addNewPointtoRRT(tempNode,rrtStepSize);//addNewPointtoRRT(myRRT,tempNode,rrtStepSize,obstacleList);
-
           if(addNodeResult){
             //std::cout<<"tempnode accepted"<<endl;
             addBranchtoRRTTree(rrtTreeMarker,tempNode);//エラーが発生した場合は、tenpNodeが新しいノードか確認する
