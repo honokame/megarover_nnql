@@ -66,7 +66,7 @@ namespace rrtstar_planner{
 
       void initNode(RRT::rrtNode &newNode, const geometry_msgs::PoseStamped& start);
 
-      void generateTempPoint(RRT::rrtNode &tempNode,double goalX, double goalY,costmap_2d::Costmap2D* costmap_);
+      void generateTempPoint(RRT::rrtNode &tempNode,costmap_2d::Costmap2D* costmap_);
       bool judgeangle1(RRT::rrtNode tempNode);
       bool addNewPointtoRRT(RRT::rrtNode &tempNode, double rrtStepSize);
       bool checkIfInsideBoundary(RRT::rrtNode &tempNode);
@@ -349,25 +349,19 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       sourcePoint.color.a = goalPoint.color.a = randomPoint.color.a = rrtTreeMarker.color.a = rrtTreeMarker1.color.a = rrtTreeMarker2.color.a = finalPath.color.a = 1.0f;
     }
 
-    void RRT::generateTempPoint(RRT::rrtNode &tempNode,double goalX, double goalY,costmap_2d::Costmap2D* costmap_){
-      float probability=0.2;
+    void RRT::generateTempPoint(RRT::rrtNode &tempNode,costmap_2d::Costmap2D* costmap_){
       //地図の大きさを設定、地図の大きさ-地図の原点
       double maxx = costmap_->getSizeInMetersX() - costmap_->getOriginX();
       double minx = costmap_->getOriginX();
       double maxy = costmap_->getSizeInMetersY() - costmap_->getOriginY();
       double miny = costmap_->getOriginY();
-      if (rand()/double(RAND_MAX)<probability){
-        tempNode.posX=goalX;
-        tempNode.posY=goalY;
-        //std::cout<<"rand: "<<tempNode.posX<<" "<<tempNode.posY<<endl;
-      }else{
-        double x = double(rand())/double(RAND_MAX)*(maxx - minx) + minx;
-        double y = double(rand())/double(RAND_MAX)*(maxy - miny) + miny;
-        //std::cout<<"Random X: "<<x <<endl<<"Random Y: "<<y<<endl;
-        tempNode.posX = x;
-        tempNode.posY = y;
-        //std::cout<<"rand: "<<tempNode.posX<<" "<<tempNode.posY<<endl;
-      }
+      
+      double x = double(rand())/double(RAND_MAX)*(maxx - minx) + minx;
+      double y = double(rand())/double(RAND_MAX)*(maxy - miny) + miny;
+      //std::cout<<"Random X: "<<x <<endl<<"Random Y: "<<y<<endl;
+      tempNode.posX = x;
+      tempNode.posY = y;
+      //std::cout<<"rand: "<<tempNode.posX<<" "<<tempNode.posY<<endl;
     }
 
     bool RRT::judgeangle1(RRT::rrtNode tempNode){
@@ -568,7 +562,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
         double goalY=goal.pose.position.y;
         if(rrtPaths.size() < rrtPathLimit){ //最終パスがないとき
           do{
-            generateTempPoint(tempNode,goalX,goalY,costmap_);
+            generateTempPoint(tempNode,costmap_);
             //std::cout<<"tempnode generated"<<endl;
             judgeangle1(tempNode);
           }
