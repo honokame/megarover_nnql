@@ -21,6 +21,7 @@ import actionlib #random()
 from actionlib_msgs.msg import * #random()
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal #random()
 from learn import NNQL_class
+import rosparam
 
 def set_model(name, x, y, z, yaw): #指定位置にセット
   model_state = ModelState()
@@ -81,25 +82,30 @@ def wall():
   rospy.sleep(1)
 
 def frontier():
+  rosparam.set_param("/move_base/global_costmap/inflation_layer/inflation_radius","0.35")
+  rosparam.set_param("/move_base/base_global_planner", "global_planner/GlobalPlanner")
+  p = call(['rosnode','kill','move_base'])
   p = call(['rosrun','explore_lite','explore'])
   rospy.sleep(1)
 
-def random():
+def random(): 
+  rosparam.set_param("/move_base/global_costmap/inflation_layer/inflation_radius","0.25")
+  rosparam.set_param("/move_base/base_global_planner", "rrtstar_planner/RRT")
+  p = call(['rosnode','kill','move_base'])
   ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
   while not ac.wait_for_server(rospy.Duration(5)):
     rospy.loginfo('wait server')
   goal = MoveBaseGoal()
   goal.target_pose.header.frame_id = 'map'
   goal.target_pose.header.stamp = rospy.Time.now()
-  goal.target_pose.pose.position.x = np.random.randint(0,8)*np.random.rand()
-  goal.target_pose.pose.position.y = np.random.randint(0,5)*np.random.rand()
-  yaw = np.random.randint(0,361)
+  goal.target_pose.pose.position.x = 0
+  goal.target_pose.pose.position.y = 0
   goal.target_pose.pose.orientation.x = 0
   goal.target_pose.pose.orientation.y = 0
-  goal.target_pose.pose.orientation.z = np.sin((yaw*np.pi/180) / 2)
-  goal.target_pose.pose.orientation.w = np.cos((yaw*np.pi/180) / 2)
+  goal.target_pose.pose.orientation.z = 0
+  goal.target_pose.pose.orientation.w = 1
   ac.send_goal(goal) 
-  rospy.sleep(20)
+  rospy.sleep(30)
   p = call(['rosnode','kill','move_base'])
   rospy.sleep(1)
 
@@ -178,11 +184,11 @@ if __name__ == '__main__':
   result_csv = 'NNQL/result.csv'
   f_result = open(result_csv,'w')
   qdata_path = 'NNQL/Qdatabase'
-  episode = 901
+  episode = 1 #901
   max_episode = 100000
   step = 1
   NNQL = NNQL_class(qdata_path) #NNQL
-  Qdatabase = NNQL.mk_Qdatabase(episode-1,0) #Qデータベース作成
+  Qdatabase = NNQL.mk_Qdatabase(episode) #Qデータベース作成
   use_Qdatabase = Qdatabase #使用するデータベース
   action_list = ["frontier", "wall", "random"] #行動集合
   #for j in range(episode): #episode
