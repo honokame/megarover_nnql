@@ -176,7 +176,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       double win_r=0.15;
       vector<RRT::rrtNode> rrtNeighbor;
       for(int i=0;i<getTreeSize();i++){
-        if ( getEuclideanDistance(getPosX(tempNodeID),getPosY(tempNodeID),getPosX(i),getPosY(i))<=win_r){//新しいノードとすべてのノード
+        if (getEuclideanDistance(getPosX(tempNodeID),getPosY(tempNodeID),getPosX(i),getPosY(i))<=win_r){//新しいノードとすべてのノード
           rrtNeighbor.push_back(getNode(i)); //隣接ノードを格納するための配列
         }   
       }
@@ -188,7 +188,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       rrtTree = input_rrtTree;
     }
 
-    // to get the number of nodes in the rrt Tree @return tree size
+    // 現在のrrtTreeの大きさを返す
     int RRT::getTreeSize(){
       return rrtTree.size();
     }
@@ -209,18 +209,18 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       return tempNode;
     }
 
-    // getting a specific node @param node id for the required node @return node in the rrtNode structure
+    // 指定したノードIDの構造体を返す
     RRT::rrtNode RRT::getNode(int id){
       return rrtTree[id];
     }
 
-    // return a node from the rrt tree nearest to the given point @param X position in X cordinate @param Y position in Y cordinate @return nodeID of the nearest Node
+    // 近くにあるノードのIDを返す
     int RRT::getNearestNodeID(double X, double Y){
       int i, returnID;
       double distance = 9999, tempDistance;
-      for(i=0; i<this->getTreeSize(); i++){
-        tempDistance = getEuclideanDistance(X,Y, getPosX(i),getPosY(i));
-        if (tempDistance < distance){
+      for(i=0; i<this->getTreeSize(); i++){ //rrtTreeの大きさを返す、ノード数
+        tempDistance = getEuclideanDistance(X,Y, getPosX(i),getPosY(i)); //ノード間のユークリッド距離を取得
+        if (tempDistance < distance){ //全探索して最も近いノードを求める
           distance = tempDistance;
           returnID = i;
         }
@@ -228,12 +228,12 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       return returnID;
     }
 
-    // returns X coordinate of the given node
+    // ノードのx座標を返す
     double RRT::getPosX(int nodeID){
       return rrtTree[nodeID].posX;
     }
 
-    // returns Y coordinate of the given node
+    // ノードのy座標を返す
     double RRT::getPosY(int nodeID){
       return rrtTree[nodeID].posY;
     }
@@ -248,7 +248,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       rrtTree[nodeID].posY = input_PosY;
     }
 
-    // returns parentID of the given node
+    // 親ノードのIDを返す
     RRT::rrtNode RRT::getParent(int id){
       return rrtTree[rrtTree[id].parentID];
     }
@@ -273,7 +273,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       return rrtTree[nodeID].children.size();
     }
 
-    // returns euclidean distance between two set of X,Y coordinates
+    // ノード間のユークリッド距離を返す
     double RRT::getEuclideanDistance(double sourceX, double sourceY, double destinationX, double destinationY){
       return sqrt(pow(destinationX - sourceX,2) + pow(destinationY - sourceY,2));
     }
@@ -349,6 +349,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       sourcePoint.color.a = goalPoint.color.a = randomPoint.color.a = rrtTreeMarker.color.a = rrtTreeMarker1.color.a = rrtTreeMarker2.color.a = finalPath.color.a = 1.0f;
     }
 
+    //新しい仮ノードをtempNodeに追加する
     void RRT::generateTempPoint(RRT::rrtNode &tempNode,costmap_2d::Costmap2D* costmap_){
       //地図の大きさを設定、地図の大きさ-地図の原点
       double maxx = costmap_->getSizeInMetersX() - costmap_->getOriginX();
@@ -356,6 +357,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       double maxy = costmap_->getSizeInMetersY() - costmap_->getOriginY();
       double miny = costmap_->getOriginY();
       
+      //マップ内にランダムな仮ノードを決める
       double x = double(rand())/double(RAND_MAX)*(maxx - minx) + minx;
       double y = double(rand())/double(RAND_MAX)*(maxy - miny) + miny;
       //std::cout<<"Random X: "<<x <<endl<<"Random Y: "<<y<<endl;
@@ -363,15 +365,15 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       tempNode.posY = y;
       //std::cout<<"rand: "<<tempNode.posX<<" "<<tempNode.posY<<endl;
     }
-
+    
+    //角度のチェック、親ノードとの角度が180度のときは仮ノードを求め直す
     bool RRT::judgeangle1(RRT::rrtNode tempNode){
-      int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);
-      RRT::rrtNode nearestNode = getNode(nearestNodeID);
+      int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY); //近いノードのIDを取得
+      RRT::rrtNode nearestNode = getNode(nearestNodeID); //近いノードの構造体を取得、nearestNodeとする
 
-      double theta = atan2(tempNode.posY - nearestNode.posY,tempNode.posX - nearestNode.posX);//この角度意味不明?、使ってないかも
       vector<double> n1,n2;
-      if(nearestNode.parentID==0){
-        n1.push_back(tempNode.posX - nearestNode.posX);
+      if(nearestNode.parentID==0){ //はじめのノードの場合
+        n1.push_back(tempNode.posX - nearestNode.posX); //近いノードとの座標差
         n1.push_back(tempNode.posY - nearestNode.posY);
         n2.push_back(0.0001);
         n2.push_back(0.0001);
@@ -381,37 +383,37 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
         n2.push_back(nearestNode.posX-getPosX(nearestNode.parentID));
         n2.push_back(nearestNode.posY-getPosY(nearestNode.parentID));
       }
-
+      //近いノードとの角度を求める
       double phy = acos((n1[0]*n2[0]+n1[1]*n2[1])/(sqrt(n1[0]*n1[0]+n1[1]*n1[1])*sqrt(n2[0]*n2[0]+n2[1]*n2[1])));
-      return (abs(phy)<=PI) ? true : false;
+      return (abs(phy)<PI/2) ? true : false; //角度180度未満ならTrue //3:60,2.5:70,2:90 
     }
 
     bool RRT::addNewPointtoRRT(RRT::rrtNode &tempNode, double rrtStepSize){
-      int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);//触発された、myrrt.で書くことは可能か?、特定の関数はrrt.cppに書かれてる
+      int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);//近いノードのIDを取得
 
-      RRT::rrtNode nearestNode = getNode(nearestNodeID);//getNodeで多くの情報を含む構造体を取得
+      RRT::rrtNode nearestNode = getNode(nearestNodeID);//近いノードの構造体を取得
 
-      double theta = atan2(tempNode.posY - nearestNode.posY,tempNode.posX - nearestNode.posX);
-
-      //if(theta<=PI/4)条件が満たされなかった場合、マーカーの値をリンクするアクションがないため問題が発生する
-      tempNode.posX = nearestNode.posX + (rrtStepSize * cos(theta));//tempNodeが新しいノードになる
+      //仮ノードの位置決定、近いノードから1ステップ分伸ばす
+      double theta = atan2(tempNode.posY - nearestNode.posY,tempNode.posX - nearestNode.posX);//近いノードとの角度
+      tempNode.posX = nearestNode.posX + (rrtStepSize * cos(theta));
       tempNode.posY = nearestNode.posY + (rrtStepSize * sin(theta));
 
-      if(checkIfInsideBoundary(tempNode) && checkIfOutsideObstacles(tempNode)){//checkIfOutsideObstacles(obstArray,tempNode))
-        tempNode.parentID = nearestNodeID;
-        tempNode.nodeID = rrtTree.size();
-        //myRRT.addNewNode(tenpNode);//tempNodeは新しいノード、RRTはこのノードで行われる
+      //仮ノードの位置がマップ内かつ障害物なし
+      if(checkIfInsideBoundary(tempNode) && checkIfOutsideObstacles(tempNode)){
+        tempNode.parentID = nearestNodeID; //近いノードを親ノードにする
+        tempNode.nodeID = rrtTree.size(); //一番最後のノードIDをノードIDにする
         tempNode.cost=sqrt(pow(nearestNode.posX - tempNode.posX,2) + pow(nearestNode.posY - tempNode.posY,2))+\
-                      nearestNode.cost;//新しいノードごとにコストを計算、プライベートメンバーは自由に呼び出せない
+                      nearestNode.cost; //はじめのノードまでの距離をコストにする
         //std::cout<<"tempNode.cost= "<<tempNode.cost<<endl;
         //std::cout<<"tempNode.posX: "<<tempNode.posX<<"  tempNode.posY"<<tempNode.posY<<endl;
-        rrtTree.push_back(tempNode);
+        rrtTree.push_back(tempNode); //rrtTreeに仮ノードを新しいノードノードとして追加する
 
         return true;
       }else
         return false;
     }
-
+    
+    // 仮ノードがマップ内 True
     bool RRT::checkIfInsideBoundary(RRT::rrtNode &tempNode){
       if(tempNode.posX < costmap_->getOriginX() || tempNode.posY < costmap_->getOriginY()  \
           || tempNode.posX > costmap_->getSizeInMetersX() - costmap_->getOriginX() \
@@ -420,35 +422,37 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       else 
         return true;
     }
-
+    
+    // 仮ノードが空きor未知 True
     bool RRT::checkIfOutsideObstacles(RRT::rrtNode tempNode){
       unsigned int gridx,gridy;
-      unsigned char* grid = costmap_->getCharMap();
-      if(costmap_->worldToMap(tempNode.posX, tempNode.posY, gridx, gridy)){     
-        int index = costmap_->getIndex(gridx, gridy);
-        if(grid[index]!=FREE_SPACE&&grid[index]!=NO_INFORMATION){
+      unsigned char* grid = costmap_->getCharMap(); //コストマップのコスト取得
+      if(costmap_->worldToMap(tempNode.posX, tempNode.posY, gridx, gridy)){ //world座標をマップ座標に変換     
+        int index = costmap_->getIndex(gridx, gridy); //仮ノードの位置のコストを取得
+        if(grid[index]!=FREE_SPACE&&grid[index]!=NO_INFORMATION){ //障害物あり
           return false;
-        }else
+        }else //空きor未知
           return true;
       }else
         return false;
     }
-
-    void RRT::addBranchtoRRTTree(visualization_msgs::Marker &rrtTreeMarker, RRT::rrtNode &tempNode){//RRT用の別の関数を作成、描画に使用
+    
+    // 新しいノードを描画用に追加
+    void RRT::addBranchtoRRTTree(visualization_msgs::Marker &rrtTreeMarker, RRT::rrtNode &tempNode){
       geometry_msgs::Point point;
-
-      point.x = tempNode.posX;//tempNodeは新しく生成されたノード
+      
+      //新しいノードの位置を与えて、マーカーに追加
+      point.x = tempNode.posX;
       point.y = tempNode.posY;
       point.z = 0;
       rrtTreeMarker.points.push_back(point);
 
-      RRT::rrtNode parentNode = getParent(tempNode.nodeID);
-
+      //新しいノードの親ノードをマーカーに追加
+      RRT::rrtNode parentNode = getParent(tempNode.nodeID); //親ノードのIDを取得
       point.x = parentNode.posX;
       point.y = parentNode.posY;
       point.z = 0;
-
-      rrtTreeMarker.points.push_back(point);//新しく生成されたノードと親ノードを追加、新しいノードをリンクする
+      rrtTreeMarker.points.push_back(point);
     }
 
     void RRTStarprocess1(visualization_msgs::Marker &rrtTreeMarker1, RRT::rrtNode &q_min,RRT::rrtNode &tempNode){
@@ -482,7 +486,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
     bool RRT::checkNodetoGoal(double X, double Y, RRT::rrtNode &tempNode){
       double distance = sqrt(pow(X-tempNode.posX,2)+pow(Y-tempNode.posY,2));
       //std::cout<<"終点からの距離： "<<distance<<endl; //
-      if(distance < 0.05){
+      if(distance < 0.5){
         return true;
       }
       return false;
@@ -550,6 +554,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
 
       int shortestPathLength = 9999; //9999
       int shortestPath = -1; //-1
+      int count = 0;
 
       RRT::rrtNode tempNode; //newNodeと同じような構造体生成
 
@@ -561,21 +566,21 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
         double goalX=goal.pose.position.x;
         double goalY=goal.pose.position.y;
         if(rrtPaths.size() < rrtPathLimit){ //最終パスがないとき
-          do{
-            generateTempPoint(tempNode,costmap_);
+          do{ //仮ノードのチェック
+            generateTempPoint(tempNode,costmap_); //仮ノードをtempNodeに追加する
             //std::cout<<"tempnode generated"<<endl;
-            judgeangle1(tempNode);
-          }
-          while(!judgeangle1(tempNode));
-          addNodeResult = addNewPointtoRRT(tempNode,rrtStepSize);//addNewPointtoRRT(myRRT,tempNode,rrtStepSize,obstacleList);
-          if(addNodeResult){
+            judgeangle1(tempNode); //仮ノードの角度チェック,180度未満ならTrue
+          }while(!judgeangle1(tempNode)); //180度なら仮ノードを求め直す
+          addNodeResult = addNewPointtoRRT(tempNode,rrtStepSize); //仮ノードを新しいノードとして追加する
+          
+          if(addNodeResult){ //仮ノードを新しいノードとして追加できたら
             //std::cout<<"tempnode accepted"<<endl;
-            addBranchtoRRTTree(rrtTreeMarker,tempNode);//エラーが発生した場合は、tenpNodeが新しいノードか確認する
+            addBranchtoRRTTree(rrtTreeMarker,tempNode);//追加したノードをマーカー追加
             //std::cout<<"tempnode printed"<<endl;
 
             //RRT*プログラム
-            //触発された、myrrt.で書くことは可能か?、特定の関数はrrt.cppに書かれてる
             //親ノードのプロセスを再選択
+            
             vector<RRT::rrtNode> rrtNeighbor=getNearestNeighbor(tempNode.nodeID);//エラーが発生した場合は、tenpNodeが新しいノードか確認する
             //std::cout<<"rrtNeighbor.size= "<<rrtNeighbor.size()<<endl;///////////////////////////////////////////////
             int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);
@@ -601,7 +606,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
             rrtTree.pop_back();
             rrtTree.push_back(tempNode);//tempNodeは新しいノード、RRTはこのノードで行われる
             //std::cout<<"tempNode.nodeID: "<<tempNode.nodeID<<"    tempNode.parentID: "<<tempNode.parentID<<endl;
-
+            
             //再敗戦処理
             //新しいノードごとに隣接ノードは前のプロセスで検出されているため、隣接ノードを再度検出する必要はない
             RRT::rrtNode q_min1=nearestNode;
@@ -619,6 +624,10 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
               }
             }
             RRTStarprocess2(rrtTreeMarker2,q_min1,tempNode);
+            count = getTreeSize();
+            if(count > 1000){
+              ROS_INFO("make tree");
+            }
             //判定終了
             nodeToGoal = checkNodetoGoal(goalX, goalY,tempNode);
             //std::cout<<"nodeToGoal： "<<nodeToGoal<<endl;
