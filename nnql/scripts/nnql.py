@@ -202,7 +202,7 @@ if __name__ == '__main__':
     get_status('vmegarover')
     scan = get_scan()
     now_state = get_rrf(scan)
-    get_occupancy()
+    occupancy_init =  get_occupancy()
     
     env_list = []
     eps = 1/(0.1*(episode)+1) 
@@ -254,7 +254,7 @@ if __name__ == '__main__':
       result_action = str(action_index)+','
       f_result.write(result_action)
     reward = get_reward(occupancy, distance) #報酬
-    result_episode = str(reward)+','+str(occupancy)+','+str(distance)+'\n'
+    result_episode = str(reward)+','+str(occupancy_init)+','+str(occupancy)+','+str(distance)+'\n'
     f_result.write(result_episode)
     for env in env_list:
       state = env[0]
