@@ -409,7 +409,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
         tempNode.nodeID = rrtTree.size(); //一番最後のノードIDをノードIDにする
         tempNode.cost=sqrt(pow(nearestNode.posX - tempNode.posX,2) + pow(nearestNode.posY - tempNode.posY,2))+\
                       nearestNode.cost; //はじめのノードまでの距離をコストにする
-        tempNode.leaf = 1;
+        tempNode.leaf = 1; //仮ノードを葉に設定する
         rrtTree[nearestNodeID].leaf = 0; //親ノードは葉でないので0
         //std::cout<<"tempNode.cost= "<<tempNode.cost<<endl;
         //std::cout<<"tempNode.posX: "<<tempNode.posX<<"  tempNode.posY"<<tempNode.posY<<endl;
@@ -549,6 +549,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
        double posY
        int parentID
        double cost
+       int leaf
        vector<int> children
        */
 
@@ -638,7 +639,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
               //ROS_INFO("make tree"); 
               for(i=0; i<this->getTreeSize(); i++){ //rrtTreeの大きさを返す、ノード数
                 //tempDistance = getEuclideanDistance(X,Y, getPosX(i),getPosY(i)); //葉のノードIDを取得
-                if(rrtTree[i].leaf == 1){
+                if(rrtTree[i].leaf == 1){ //ノードが葉かどうか
                   std::cout<<i<<endl;
                 }
                 //if (tempDistance < distance){ //全探索して最も近いノードを求める
