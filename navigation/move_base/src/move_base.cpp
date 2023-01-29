@@ -916,7 +916,7 @@ namespace move_base {
       if(recovery_trigger_ == PLANNING_R)
         recovery_index_ = 0;
     }
-
+    ros::NodeHandle name("~");
     //the move_base state machine, handles the control logic for navigation
     switch(state_){
       //int count = 0;
@@ -933,7 +933,6 @@ namespace move_base {
       //if we're controlling, we'll attempt to find valid velocity commands
       case CONTROLLING:
         ROS_DEBUG_NAMED("move_base","In controlling state.");
-
         //check to see if we've reached our goal
         if(tc_->isGoalReached()){
           ROS_DEBUG_NAMED("move_base","Goal reached!");
@@ -943,8 +942,16 @@ namespace move_base {
           boost::unique_lock<boost::recursive_mutex> lock(planner_mutex_);
           runPlanner_ = false;
           lock.unlock();
-
+          
           as_->setSucceeded(move_base_msgs::MoveBaseResult(), "Goal reached.");
+          
+          std::string planner_name;
+          name.getParam("base_global_planner",planner_name);
+          if(planner_name == "rrtstar_planner/RRT"){
+            ROS_INFO("%s",planner_name.c_str());
+            ros::shutdown();
+          }
+
           return true;
         }
 
