@@ -6,11 +6,11 @@
       <sensor type="ray" name="${prefix}_lrf_sensor">
         <pose>0 0 0 0 0 0</pose>
         <visualize>true</visualize>
-        <update_rate>40</update_rate>
+        <update_rate>10</update_rate>
         <ray>
           <scan>
             <horizontal>
-              <samples>1000</samples>
+              <samples>1012</samples>
               <resolution>1</resolution>
               <min_angle>${min_rad}</min_angle>
               <max_angle>${max_rad}</max_angle>
