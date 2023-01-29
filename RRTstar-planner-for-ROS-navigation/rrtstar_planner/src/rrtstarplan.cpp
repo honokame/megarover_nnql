@@ -27,6 +27,7 @@ namespace rrtstar_planner{
         int parentID;
         double cost;
         int leaf;
+        int leaf_cost;
         vector<int> children;
       };
 
@@ -72,9 +73,10 @@ namespace rrtstar_planner{
       bool addNewPointtoRRT(RRT::rrtNode &tempNode, double rrtStepSize);
       bool checkIfInsideBoundary(RRT::rrtNode &tempNode);
       bool checkIfOutsideObstacles(RRT::rrtNode tempNode);
+      int getCost(RRT::rrtNode tempNode);
       void addBranchtoRRTTree(visualization_msgs::Marker &rrtTreeMarker, RRT::rrtNode &tempNode);
       bool checkNodetoGoal(double X, double Y, RRT::rrtNode &tempNode);
-      void setFinalPathData(vector< vector<int> > &rrtPaths,  int i, visualization_msgs::Marker &finalpath, double goalX, double goalY);
+      void setFinalPathData(vector< vector<int> > &rrtPaths,  int i, visualization_msgs::Marker &finalpath);
 
       void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
       bool makePlan(const geometry_msgs::PoseStamped& start,
@@ -166,6 +168,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       newNode.nodeID = 0;
       newNode.cost=0;
       newNode.leaf = 1; //leafなら1
+      newNode.leaf_cost = 0;
       rrtTree.push_back(newNode);
     }
 
@@ -410,6 +413,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
         tempNode.cost=sqrt(pow(nearestNode.posX - tempNode.posX,2) + pow(nearestNode.posY - tempNode.posY,2))+\
                       nearestNode.cost; //はじめのノードまでの距離をコストにする
         tempNode.leaf = 1; //仮ノードを葉に設定する
+        tempNode.leaf_cost = getCost(tempNode);
         rrtTree[nearestNodeID].leaf = 0; //親ノードは葉でないので0
         //std::cout<<"tempNode.cost= "<<tempNode.cost<<endl;
         //std::cout<<"tempNode.posX: "<<tempNode.posX<<"  tempNode.posY"<<tempNode.posY<<endl;
@@ -443,6 +447,25 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       }else
         return false;
     }
+
+    // 仮ノードが空き:コスト1、未知:コスト2
+    int RRT::getCost(RRT::rrtNode tempNode){
+      unsigned int gridx,gridy;
+      unsigned char* grid = costmap_->getCharMap(); //コストマップのコスト取得
+      if(costmap_->worldToMap(tempNode.posX, tempNode.posY, gridx, gridy)){ //world座標をマップ座標に変換     
+        int index = costmap_->getIndex(gridx, gridy); //仮ノードの位置のコストを取得
+        if(grid[index]==FREE_SPACE){ 
+          return 1;
+        }
+        if(grid[index]==NO_INFORMATION){
+          return 2;
+        }
+        return 0;
+      }
+      else
+        return 0;
+    }
+
     
     // 新しいノードを描画用に追加
     void RRT::addBranchtoRRTTree(visualization_msgs::Marker &rrtTreeMarker, RRT::rrtNode &tempNode){
@@ -500,7 +523,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       return false;
     }
 
-    void RRT::setFinalPathData(vector< vector<int> > &rrtPaths,  int i, visualization_msgs::Marker &finalpath, double goalX, double goalY){
+    void RRT::setFinalPathData(vector< vector<int> > &rrtPaths,  int i, visualization_msgs::Marker &finalpath){
       RRT::rrtNode tempNode;
       geometry_msgs::Point point;
       for(int j=0; j<rrtPaths[i].size();j++){
@@ -512,10 +535,6 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
 
         finalpath.points.push_back(point);
       }
-
-      point.x = goalX;
-      point.y = goalY;
-      finalpath.points.push_back(point);
     }
 
     double caldistance(double sourceX, double sourceY, double destinationX, double destinationY){
@@ -550,6 +569,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
        int parentID
        double cost
        int leaf
+       int leaf_cost
        vector<int> children
        */
 
@@ -566,7 +586,6 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       int count = 0;
 
       RRT::rrtNode tempNode; //newNodeと同じような構造体生成
-
       bool addNodeResult = false, nodeToGoal = false;
       std::cout<<"start: "<<start.pose.position.x<<"  "<<start.pose.position.y<<endl; //現在位置とゴールを出力
       std::cout<<"goal: "<<goal.pose.position.x<<"  "<<goal.pose.position.y<<endl;
@@ -574,6 +593,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       while(ros::ok() && status){ //ループ
         double goalX=goal.pose.position.x;
         double goalY=goal.pose.position.y;
+        bool max_count = false;
         if(rrtPaths.size() < rrtPathLimit){ //最終パスがないとき
           do{ //仮ノードのチェック
             generateTempPoint(tempNode,costmap_); //仮ノードをtempNodeに追加する
@@ -586,114 +606,76 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
             //std::cout<<"tempnode accepted"<<endl;
             addBranchtoRRTTree(rrtTreeMarker,tempNode);//追加したノードをマーカー追加
             //std::cout<<"tempnode printed"<<endl;
-
-            //RRT*プログラム
-            //親ノードのプロセスを再選択
-            /*
-            vector<RRT::rrtNode> rrtNeighbor=getNearestNeighbor(tempNode.nodeID);//エラーが発生した場合は、tenpNodeが新しいノードか確認する
-            //std::cout<<"rrtNeighbor.size= "<<rrtNeighbor.size()<<endl;///////////////////////////////////////////////
-            int nearestNodeID = getNearestNodeID(tempNode.posX,tempNode.posY);
-            RRT::rrtNode nearestNode = getNode(nearestNodeID);
-            RRT::rrtNode q_min=nearestNode;
-            double C_min=tempNode.cost;//tempNode.costの前にコストに対する操作がないことに注意
-            for(int k=0;k<rrtNeighbor.size();k++){
-              if(checkIfInsideBoundary(rrtNeighbor[k]) && checkIfOutsideObstacles(rrtNeighbor[k])\
-                  &&rrtNeighbor[k].cost+\
-                  caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY)<C_min){
-                q_min = rrtNeighbor[k];
-                C_min = rrtNeighbor[k].cost+\
-                        caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY);
-              }
-            }
-            RRTStarprocess1(rrtTreeMarker1,q_min,tempNode);//addBranchtoRRTTreeのような新しい関数を追加、rrtTreeMarker1は新しいマーカー
-            tempNode.cost=C_min;
-
-            //問題の原因：parentIDとnodeIDが等しい場合がある
-            if(tempNode.nodeID!=q_min.nodeID)
-              tempNode.parentID=q_min.nodeID;//RRT*の最初のプロセス、親ノードを再選択
-
-            rrtTree.pop_back();
-            rrtTree.push_back(tempNode);//tempNodeは新しいノード、RRTはこのノードで行われる
-            //std::cout<<"tempNode.nodeID: "<<tempNode.nodeID<<"    tempNode.parentID: "<<tempNode.parentID<<endl;
             
-            //再敗戦処理
-            //新しいノードごとに隣接ノードは前のプロセスで検出されているため、隣接ノードを再度検出する必要はない
-            RRT::rrtNode q_min1=nearestNode;
-            double C_min1=tempNode.cost+caldistance(q_min.posX,q_min.posY,tempNode.posX,tempNode.posY);
-
-            for(int k=0;k<rrtNeighbor.size();k++){
-              if(checkIfInsideBoundary(rrtNeighbor[k]) && checkIfOutsideObstacles(rrtNeighbor[k])\
-                  &&(tempNode.cost+caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY))\
-                  < rrtNeighbor[k].cost){//rrtNeighbor==tempNodeのときのみ、q_min1==tempNodeが発生
-                q_min1=rrtNeighbor[k];
-                C_min1=tempNode.cost+\
-                       caldistance(tempNode.posX,tempNode.posY,rrtNeighbor[k].posX,rrtNeighbor[k].posY);
-                if(q_min1.nodeID!=tempNode.nodeID)
-                  setParentID(q_min1.nodeID, tempNode.nodeID);
-              }
-            }
-            RRTStarprocess2(rrtTreeMarker2,q_min1,tempNode);*/
-            count = getTreeSize();
-            if(count == 500){
-              int i;
-              //ROS_INFO("make tree"); 
-              for(i=0; i<this->getTreeSize(); i++){ //rrtTreeの大きさを返す、ノード数
-                //tempDistance = getEuclideanDistance(X,Y, getPosX(i),getPosY(i)); //葉のノードIDを取得
-                if(rrtTree[i].leaf == 1){ //ノードが葉かどうか
-                  std::cout<<i<<endl;
+          //ゴール判定、使用しない
+          //nodeToGoal = checkNodetoGoal(goalX, goalY,tempNode);
+          //std::cout<<"nodeToGoal： "<<nodeToGoal<<endl;
+          if(getTreeSize() == 100){ //ゴール判定Trueなら
+            int i,returnID;
+            int cost_max = 0;
+            
+            for(i=0; i<this->getTreeSize(); i++){ //rrtTreeの大きさを返す、ノード数
+              // ノードが葉ならコストを求める
+              if(rrtTree[i].leaf == 1){ 
+                vector<int> cost_path; //コストを求めるためのpath
+                cost_path.push_back(i);
+                int treecost = 0; 
+                while(rrtTree[cost_path.front()].nodeID != 0){ //はじめのノードまでコストを求める
+                  treecost += rrtTree[cost_path.front()].leaf_cost; //葉の木のコストをもとめる
+                  cost_path.insert(cost_path.begin(),rrtTree[cost_path.front()].parentID); //親ノードをcost_pathに挿入
+                } 
+                std::cout<<i<<" "<<rrtTree[i].leaf_cost<<" "<<treecost<<endl; //葉のノードID、コスト、木のコスト
+                
+                // 木のコストが大きいものをゴールIDにする
+                if(treecost  > cost_max){
+                  cost_max = treecost;
+                  returnID = i;
                 }
-                //if (tempDistance < distance){ //全探索して最も近いノードを求める
-                //  distance = tempDistance;
-                //  returnID = i;
-                //}
+                cost_path.clear(); 
               }
             }
-            //ゴール判定、使用しない
-            nodeToGoal = checkNodetoGoal(goalX, goalY,tempNode);
-            //std::cout<<"nodeToGoal： "<<nodeToGoal<<endl;
-            if(nodeToGoal){ //ゴール判定Trueなら
-              //std::cout<<"最後のポイントのID： "<<tempNode.nodeID<<endl;
-              path = getRootToEndPath(tempNode.nodeID); //ゴールまでのパスを取得
-              rrtPaths.push_back(path); //ゴールまでのpathを格納
-              //std::cout<<"New Path Found. Total paths "<<rrtPaths.size()<<endl;
-              int i=0;
+            std::cout<<returnID<<" "<<cost_max<<endl;
+            path = getRootToEndPath(returnID); //ゴールまでのパスを取得 
+            rrtPaths.push_back(path); //ゴールまでのpathを格納
+            //std::cout<<"New Path Found. Total paths "<<rrtPaths.size()<<endl;
+            int j=0;
 
-              do{ //pathの座標をplanの格納、planはglobal path
-                geometry_msgs::PoseStamped pose=start;
-                RRT::rrtNode pathNode=getNode(path[i]); //ノードの構造体取得
-                pose.pose.position.x=pathNode.posX; //ノードの位置を格納
-                pose.pose.position.y=pathNode.posY;
-                plan.push_back(pose); //planにノード位置を格納
-                i++; 
-              }while(path[i]!=tempNode.nodeID);
-              plan.push_back(goal); //ゴール座標をpathに格納
-              //ros::Duration(10).sleep();
-              std::cout<<"got Root Path"<<endl; 
-            }
+            do{ //pathの座標をplanの格納、planはglobal path
+              geometry_msgs::PoseStamped pose=start;
+              RRT::rrtNode pathNode=getNode(path[j]); //ノードの構造体取得
+              pose.pose.position.x=pathNode.posX; //ノードの位置を格納
+              pose.pose.position.y=pathNode.posY;
+              plan.push_back(pose); //planにノード位置を格納
+              j++; 
+            }while(path[j]!=returnID);
+            //plan.push_back(goal); //ゴール座標をpathに格納
+            //ros::Duration(10).sleep();
+            std::cout<<"got Root Path"<<endl; 
           }
-        }else{ //if(rrtPaths.size() >= rrtPathLimit)
-          status = success;
-          std::cout<<"Finding Optimal Path"<<endl;
-
-          for(int i=0; i<rrtPaths.size();i++){
-            if(rrtPaths[i].size() < shortestPath){
-              shortestPath = i;
-              shortestPathLength = rrtPaths[i].size();
-            }
-          }
-          setFinalPathData(rrtPaths, shortestPath, finalPath, goalX, goalY);//パスの描画
-          rrt_publisher.publish(finalPath);
-          return  true;
         }
-        rrt_publisher.publish(rrtTreeMarker);
-        rrt_publisher.publish(rrtTreeMarker1);
-        rrt_publisher.publish(rrtTreeMarker2);
+      }else{ //if(rrtPaths.size() >= rrtPathLimit)
+        status = success;
+        std::cout<<"Finding Optimal Path"<<endl;
 
-        //ros::spinOnce();
-        //ros::Duration(0.01).sleep();
+        for(int i=0; i<rrtPaths.size();i++){
+          if(rrtPaths[i].size() < shortestPath){
+            shortestPath = i;
+            shortestPathLength = rrtPaths[i].size();
+          }
+        }
+        setFinalPathData(rrtPaths, shortestPath, finalPath);//パスの描画
+        rrt_publisher.publish(finalPath);
+        return  true;
       }
+      rrt_publisher.publish(rrtTreeMarker);
+      rrt_publisher.publish(rrtTreeMarker1);
+      rrt_publisher.publish(rrtTreeMarker2);
+
+      //ros::spinOnce();
+      //ros::Duration(0.01).sleep();
     }
   }
+}
 /*
    int main(int argc, char** argv){
    ros::init(argc, argv, "rrt");
