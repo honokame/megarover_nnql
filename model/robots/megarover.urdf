@@ -9,7 +9,7 @@
     <visual>
       <origin xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/rover/catkin_ws/src/megarover_samples/meshes/DAE/megarover.dae"/>
+        <mesh filename="/home/rover/catkin_ws/src/model/meshes/DAE/megarover.dae"/>
       </geometry>
     </visual>
   </link>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="megarover20" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find megarover_samples)/urdf/body/body.urdf.xacro"/>
+  <xacro:include filename="$(find model)/urdf/body/body.urdf.xacro"/>
 
   <link name="base_footprint"/>
 

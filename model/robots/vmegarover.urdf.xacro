@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <robot name="vmegarover" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find megarover_samples)/urdf/body/vbody.urdf.xacro"/>
-  <xacro:include filename="$(find megarover_samples)/urdf/wheel/vwheel.urdf.xacro"/>
-  <xacro:include filename="$(find megarover_samples)/urdf/lrf/lrf.urdf.xacro"/>
+  <xacro:include filename="$(find model)/urdf/body/vbody.urdf.xacro"/>
+  <xacro:include filename="$(find model)/urdf/wheel/vwheel.urdf.xacro"/>
+  <xacro:include filename="$(find model)/urdf/lrf/lrf.urdf.xacro"/>
 
   <!-- =============== Link & Joint =============== -->
   <!-- Base -->
