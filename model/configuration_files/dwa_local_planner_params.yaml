@@ -4,7 +4,7 @@
 DWAPlannerROS:
   acc_lim_x: 2.0
   acc_lim_y: 0.0
-  acc_lim_th: 0.6
+  acc_lim_th: 1.0 #0.6
   max_vel_trans: 0.6
   min_vel_trans: 0.1 #0.0
   max_vel_x: 1.0
