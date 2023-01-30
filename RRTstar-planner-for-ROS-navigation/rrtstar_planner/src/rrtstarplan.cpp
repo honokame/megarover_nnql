@@ -593,8 +593,9 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
       while(ros::ok() && status){ //ループ
         double goalX=goal.pose.position.x;
         double goalY=goal.pose.position.y;
-        bool max_count = false;
-        if(rrtPaths.size() < rrtPathLimit){ //最終パスがないとき
+
+        if(rrtPaths.size() < rrtPathLimit){ //最終パスがないとき 
+          //ros::Time start_t = ros::Time::now();
           do{ //仮ノードのチェック
             generateTempPoint(tempNode,costmap_); //仮ノードをtempNodeに追加する
             //std::cout<<"tempnode generated"<<endl;
@@ -610,7 +611,7 @@ PLUGINLIB_EXPORT_CLASS(rrtstar_planner::RRT, nav_core::BaseGlobalPlanner)
           //ゴール判定、使用しない
           //nodeToGoal = checkNodetoGoal(goalX, goalY,tempNode);
           //std::cout<<"nodeToGoal： "<<nodeToGoal<<endl;
-          if(getTreeSize() == 100){ //ゴール判定Trueなら
+          if(getTreeSize() == 50){ //ゴール判定Trueなら
             int i,returnID;
             int cost_max = 0;
             
