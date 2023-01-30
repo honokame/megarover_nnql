@@ -42,8 +42,8 @@ def callback(msg1, msg2):
   if(odom_theta < 0):
     odom_theta = odom_theta + 360
  
-  rospy.loginfo('odom_x:%d, odom_y:%d, odom_theta:%d',int(odom_x),int(odom_y),int(odom_theta))
-  status = str(time2) + ',' + str(int(odom_x)) + ',' + str(int(odom_y)) + ',' + str(int(odom_theta)) + '\n'
+  rospy.loginfo('odom_x:%d, odom_y:%d, odom_theta:%d',odom_x,odom_y,int(odom_theta))
+  status = str(time2) + ',' + str(odom_x) + ',' + str(odom_y) + ',' + str(int(odom_theta)) + '\n'
   f_status.write(status)
 
 def odometry():
