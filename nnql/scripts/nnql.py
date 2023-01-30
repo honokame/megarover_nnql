@@ -22,6 +22,7 @@ from actionlib_msgs.msg import * #random()
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal #random()
 from learn import NNQL_class
 import rosparam
+import rosnode
 
 def set_model(name, x, y, z, yaw): #指定位置にセット
   model_state = ModelState()
@@ -82,7 +83,9 @@ def wall():
   rospy.sleep(1)
 
 def frontier():
-  rosparam.set_param("/move_base/global_costmap/inflation_layer/inflation_radius","0.35")
+  rosparam.set_param("/move_base/global_costmap/inflation_layer/inflation_radius","0.35") 
+  rosparam.set_param("/move_base/local_costmap/width","3")
+  rosparam.set_param("/move_base/local_costmap/height","3")
   rosparam.set_param("/move_base/base_global_planner", "global_planner/GlobalPlanner")
   p = call(['rosnode','kill','move_base'])
   p = call(['rosrun','explore_lite','explore'])
@@ -90,10 +93,12 @@ def frontier():
 
 def random(): 
   rosparam.set_param("/move_base/global_costmap/inflation_layer/inflation_radius","0.25")
+  rosparam.set_param("/move_base/local_costmap/width","2")
+  rosparam.set_param("/move_base/local_costmap/height","2")
   rosparam.set_param("/move_base/base_global_planner", "rrtstar_planner/RRT")
   p = call(['rosnode','kill','move_base'])
   ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-  while not ac.wait_for_server(rospy.Duration(5)):
+  while not ac.wait_for_server(rospy.Duration(10)):
     rospy.loginfo('wait server')
   goal = MoveBaseGoal()
   goal.target_pose.header.frame_id = 'map'
@@ -105,7 +110,7 @@ def random():
   goal.target_pose.pose.orientation.z = 0
   goal.target_pose.pose.orientation.w = 1
   ac.send_goal(goal) 
-  rospy.sleep(30)
+  rospy.sleep(40)
   p = call(['rosnode','kill','move_base'])
   rospy.sleep(1)
 
@@ -226,7 +231,6 @@ if __name__ == '__main__':
         action_index = np.random.randint(0, 3)
         knn_list = None
         action = action_list[action_index]
-
       Qdatabase = NNQL.Q_data_add(now_state,q_average,Qdatabase)  #qデータベース追加
       
       rospy.loginfo('action:%s',action)
