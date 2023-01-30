@@ -31,8 +31,8 @@ def callback(msg1, msg2):
   writer = csv.writer(f_scan)
   writer.writerow(scan)
   time2 = msg2.header.stamp
-  odom_x = msg2.pose.pose.position.x + 0.5
-  odom_y = msg2.pose.pose.position.y + 2.3 #2.3
+  odom_x = msg2.pose.pose.position.x + 1.5
+  odom_y = msg2.pose.pose.position.y + 5.2 #2.3
   qx = msg2.pose.pose.orientation.x
   qy = msg2.pose.pose.orientation.y 
   qz = msg2.pose.pose.orientation.z
@@ -50,7 +50,7 @@ def odometry():
   map_subscriber = rospy.Subscriber('/map', OccupancyGrid, callback_map)
   scan_subscriber = message_filters.Subscriber('/scan', LaserScan)
   odom_subscriber = message_filters.Subscriber('/odom', Odometry)
-  mf = message_filters.ApproximateTimeSynchronizer([scan_subscriber, odom_subscriber], 10, 0.01)
+  mf = message_filters.ApproximateTimeSynchronizer([scan_subscriber, odom_subscriber], 10, 0.05)
   mf.registerCallback(callback)
   rospy.spin()
 
