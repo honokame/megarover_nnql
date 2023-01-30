@@ -23,7 +23,7 @@
   <!--include file="$(find model)/launch/keycontrol.launch"/-->
 
   <!-- controll -->
-  <include file="$(find megarover_samples)/launch/vmegarover_control.launch"/>
+  <include file="$(find model)/launch/control.launch"/>
 
   <!-- map server -->
   <!--<arg name="map_file" default="$(find model)/map/sample.yaml"/>
