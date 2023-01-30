@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-  <arg name="model" default="$(find megarover_samples)/robots/vmegarover.urdf.xacro"/>
+  <arg name="model" default="$(find model)/robots/vmegarover.urdf.xacro"/>
   <arg name="rvizconfig" default="$(find model)/configuration_files/rviz/move_base.rviz"/>  
 
   <!-- gazebo world -->
@@ -57,7 +57,6 @@
     <rosparam file="$(find model)/configuration_files/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find model)/configuration_files/dwa_local_planner_params.yaml" command="load" />
     <rosparam file="$(find model)/configuration_files/move_base_params.yaml" command="load" />
-
     <param name="global_costmap/global_frame" value="map" />
     <param name="global_costmap/robot_base_frame" value="base_link" />
     <param name="local_costmap/laser_scan_sensor/sensor_frame" value="laser_link" /><!--lrf_link?-->
@@ -69,5 +68,5 @@
   </node>
 
   <!-- rviz -->
-  <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /-->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
  </launch>
