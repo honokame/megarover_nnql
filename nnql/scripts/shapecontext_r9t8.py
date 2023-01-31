@@ -1,81 +1,74 @@
 # -*- coding: utf-8 -*-
-
+# python shapecontext_r9t8.py ファイル番号 何行目
 import math
 import pandas as pd
 import csv
 import sys 
 
-#path = 'data/'
-#scan = pd.read_csv(path +'scan7.csv', header=None)
-where = int(sys.argv[2])
-input_file = 'scan' + sys.argv[1] + '.csv'
-output_file = 'feature' + sys.argv[1] +'_' + sys.argv[2] + '.csv'
-scan = pd.read_csv(input_file, header=None)
+where = int(sys.argv[2]) #何行目からはじめるか 
+
+input_file = 'scan' + sys.argv[1] + '.csv' #入力ファイル
+scan = pd.read_csv(input_file, header=None) #入力ファイル読み込み
+
+#１列目の時間を取り除く
 scan = scan.drop(scan.columns[[0, 0]], axis=1)
 sh = scan.shape
 scan.columns = range(sh[1])
-# scan
+
+output_file = 'feature' + sys.argv[1] +'_' + sys.argv[2] + '.csv' #出力ファイル
 f_file = open(output_file, 'w') 
 
 pi = math.pi
 
-x = []
+x = [] #ロボットを中心にした座標
 y = []
-r = []
-theta = []
+r = [] #障害物までの距離、スキャンデータの値
+theta = [] #データ点の角度
 deg = 0
-rad = 180 / float(1010)
-node = [57, 169, 281, 393, 505, 617, 729, 841, 953]
-pos_x = []
+rad = 180 / float(1008) #スキャンデータの数-1、データ間の角度
+node = [56, 168, 280, 392, 504, 616, 728, 840, 952] #代表点、グラフのノードになる
+pos_x = [] #代表点の座標
 pos_y = []
-diff_x = []
+diff_x = [] #代表点との座標の差
 diff_y = []
-distance = []
-tan = []
-tan_theta = []
-area = []
-feature = []
-all_feature = []
+distance = [] #代表点との距離
+area = [] #どの領域か
+feature = [] #ヒストグラム、特徴量になる
 
-for data in range(1011):
+#データ点がある角度を求める
+for data in range(1009): #スキャンデータの数
   deg = rad*data
   theta.insert(0, deg*pi/float(180))
 
-for data in range(100):
-  #print(data+where)  # 消してもいい
-  r = scan[data+where:data+where+1]
+#指定した行を含めた100行文の特徴量を求める
+for data in range(1000):
+  r = scan[data+where:data+where+1] #指定した行を含めた100行文のデータ
   x = []
   y = []
+  #ロボットを中心にしたxy座標を求める、極座標＞直行座標
   for i in range(len(theta)):
-    tmp_x = r[i] * math.cos(theta[i])
-    tmp_y = r[i] * math.sin(theta[i])
+    tmp_x = r[i] * math.cos(theta[i]) #x=rcosθ
+    tmp_y = r[i] * math.sin(theta[i]) #y=rsinθ
     x.append(tmp_x)
     y.append(tmp_y)
 
+  #代表点のxy座標を抜き出す
   pos_x = [x[node[0]], x[node[1]], x[node[2]], x[node[3]],
         x[node[4]], x[node[5]], x[node[6]], x[node[7]], x[node[8]]]
   pos_y = [y[node[0]], y[node[1]], y[node[2]], y[node[3]],
         y[node[4]], y[node[5]], y[node[6]], y[node[7]], y[node[8]]]
-    #diff_x = []
-    #diff_y = []
-    #distance = []
-    #tan = []
-  for n in range(9):
-    # diff_x = []
-    #diff_y = []
-    #distance = []
-    #tan = []
-    area = []
-    for j in range(len(x)):
-      tmp_x = x[j] - pos_x[n]
-      tmp_y = y[j] - pos_y[n]
-      tmp_d = ((tmp_x**2) + (tmp_y**2))**0.5
-      tmp_t = math.degrees(math.atan2(tmp_y, tmp_x))
-      #diff_x.append(tmp_x)
-      #diff_y.append(tmp_y)
-      #distance.append(tmp_d)
-      #tan.append(tmp_t)
 
+  #代表点ごとに特徴量を求める
+  for n in range(9): #代表点の数
+    area = []
+    #代表点との距離、角度を求めてどの領域の点か求める
+    for j in range(len(x)): #スキャンデータの数
+      tmp_x = x[j] - pos_x[n] #代表点との座標の差
+      tmp_y = y[j] - pos_y[n]
+      tmp_d = ((tmp_x**2) + (tmp_y**2))**0.5 #代表点との座標差から距離を求める
+      tmp_t = math.degrees(math.atan2(tmp_y, tmp_x)) #代表点から見た角度を求める
+
+      #代表点から見た角度ごとに領域番号をつける
       if ((tmp_t >= 0) & (tmp_t < 45)):
         tmp_theta = 1
       elif (tmp_t >= 45) & (tmp_t < 90):
@@ -92,8 +85,13 @@ for data in range(100):
         tmp_theta = 7
       else:
         tmp_theta = 8
-      #tan_theta.append(tmp_theta)
-      tmp_dis = int(tmp_d)+1
+      
+      if(str(tmp_d) == "inf"): #スキャンデータがinfだったとき用のエラー処理
+        tmp_dis = 100 #外れ値として与えるだけなので被らなければ何でも良い
+      else:
+        tmp_dis = int(tmp_d)+1 #下記の領域番号の計算がしやすいように+1してる
+
+      #領域番号割り当て、距離と上で求めた角度の領域番号から計算する
       if (tmp_dis == 1):
         tmp_b = tmp_theta * 9-8
       elif (tmp_dis == 2):
@@ -113,23 +111,20 @@ for data in range(100):
       elif (tmp_dis == 9):
         tmp_b = tmp_theta * 9
       else:
-        tmp_b = 75
-        print(tmp_dis)
-        print(data+where)# error
-      area.append(tmp_b)
-    for c in range(72):
-      if (c == 0):
+        tmp_b = 75 #エラー処理、被らなければ何でも良い、r9t8は72まで領域番号があるのでそれ以上の数値
+
+      area.append(tmp_b) #領域番号をデータごとに格納
+    
+    #各領域番号の数を数える、featureがヒストグラム
+    for c in range(72): #領域番号の最高値
+      if (c == 0): #代表点を含んでいるので1引く
         feature.append(area.count(c+1)-1)
       else:
         feature.append(area.count(c+1))
-    #a_feature.append(feature)
+  
+  #ファイル書き込み
   f_file.write(str(data+where)+',')
   writer = csv.writer(f_file)
   writer.writerow(feature)
-  feature = []
-
-#feature_list = path + 'feature3.csv'
-#feature_list = 'feature7.csv'
-#df = pd.DataFrame(all_feature)
-#df.to_csv(feature_list, index=None)
-# df
+  
+  feature = [] #初期化
