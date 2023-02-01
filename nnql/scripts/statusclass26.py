@@ -2,28 +2,36 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-#from sklearn.model_selection import train_test_split
+import sys
 
-# data = pd.read_csv(path +'wallstatus.csv', header=None)
-data = pd.read_csv('data/statustest1.csv', header=None)
-data = data.assign(place = 0,place60 = 0,place30 = 0)
+input_file = 'status' + sys.argv[1] + '.csv' #入力ファイル
+data = pd.read_csv(input_file, header=None) #入力ファイル読み込み
+data = data.assign(place = 0,place60 = 0,place30 = 0) #場所クラスの列を作成
+
+output_file = 'statusclass' + sys.argv[1] + '.csv' #出力ファイル
 
 for index,row in data.iterrows():
-  x = row[1]
-  y = row[2]
-  t = row[3]
+  x = int(row[1])
+  y = int(row[2])
+  t = int(row[3])
   #場所クラス
   if(y == 0):
-    row[4] = 26 #26,30
+    row[4] = 26 
   elif(y == 1):
+    if(x == 0):
+      row[4] = 1
+    if(x == 1):
+      row[4] = 2
+    if(x == 2):
+      row[4] = 3
     if((x == 3) | (x == 4)):
-      row[4] = 25 #25,26
+      row[4] = 25 
     if(x == 5):
-      row[4] = 5 #5,27
+      row[4] = 5 
     if(x == 6):
-      row[4] = 6 #6,28
+      row[4] = 6 
     if(x == 7):
-      row[4] = 7 #7,29
+      row[4] = 7 
   elif(y == 2):
     if(x == 0):
       row[4] = 1
@@ -44,6 +52,10 @@ for index,row in data.iterrows():
   elif(y==3):
     if((x == 0) | (x == 1)):
       row[4] = 9
+    if(x == 2):
+      row[4] = 3
+    if(x == 3):
+      row[4] = 10
     if(x == 4):
       row[4] = 10
     if((x == 5) | (x == 6)):
@@ -53,10 +65,14 @@ for index,row in data.iterrows():
   elif(y==4):
     if((x == 0) | (x == 1)):
       row[4] = 13
+    if(x == 3):
+      row[4] = 14
     if(x == 4):
       row[4] = 14
     if(x == 5):
       row[4] = 15
+    if(x == 6):
+      row[4] = 16
     if(x == 7):
       row[4] = 16
     if(x == 8):
@@ -70,13 +86,27 @@ for index,row in data.iterrows():
       row[4] = 20
     if(x == 4):
       row[4] = 21
+    if(x == 5):
+      row[4] = 15
+    if(x == 6):
+      row[4] = 22
     if(x == 7):
       row[4] = 22
     if(x == 8):
       row[4] = 23
   elif(y == 6):
+    if(x == 1):
+      row[4] = 18
+    if(x == 2):
+      row[4] = 19
+    if(x == 3):
+      row[4] = 20
+    if(x == 4):
+      row[6] = 21
     if((x == 7) | (x == 8)):
-      row[4] = 24 #24,25
+      row[4] = 24
+  elif(y == 7):
+    row[4] = 24
   else:
       row[4] = 0
 
@@ -127,4 +157,4 @@ for index,row in data.iterrows():
   else:
     row[6] = row[4]*12-11
 
-data.to_csv('data/statusclasstest1_26.csv', header=None,index=None)
+data.to_csv(output_file, header=None,index=None)
