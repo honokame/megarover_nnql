@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#rosrun nnql collect_mega.py ファイル番号
 
 import numpy as np
 
@@ -8,7 +9,7 @@ import tf
 import sys #引数
 import os #ファイル読み書き
 import csv #リストをcsvに書き込み
-import message_filters
+import message_filters #データの同期
 from subprocess import *
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
@@ -17,13 +18,15 @@ from std_srvs.srv import Empty
 from nav_msgs.msg import OccupancyGrid
 import commands
 
+#マップのセルをカウントする
 def callback_map(msg):
   mapdata = msg.data
   time = msg.header.stamp
   rospy.loginfo('size:%d, unknow:%d, know:%d',len(mapdata),mapdata.count(-1),mapdata.count(100))
   map_status = str(time) + ',' + str(mapdata.count(-1)) + ',' + str(mapdata.count(100)) + '\n'
   f_map.write(map_status)
-  
+
+#オドメトリとスキャンデータの同期をして保存する
 def callback(msg1, msg2):
   time1 = msg1.header.stamp
   scan = msg1.ranges
@@ -46,18 +49,19 @@ def callback(msg1, msg2):
   status = str(time2) + ',' + str(odom_x) + ',' + str(odom_y) + ',' + str(int(odom_theta)) + '\n'
   f_status.write(status)
 
+#受信するデータの設定
 def odometry():
-  map_subscriber = rospy.Subscriber('/map', OccupancyGrid, callback_map)
-  scan_subscriber = message_filters.Subscriber('/scan', LaserScan)
-  odom_subscriber = message_filters.Subscriber('/odom', Odometry)
-  mf = message_filters.ApproximateTimeSynchronizer([scan_subscriber, odom_subscriber], 10, 0.05)
-  mf.registerCallback(callback)
+  map_subscriber = rospy.Subscriber('/map', OccupancyGrid, callback_map) #マップの占有格子地図
+  scan_subscriber = message_filters.Subscriber('/scan', LaserScan) #スキャンデータ
+  odom_subscriber = message_filters.Subscriber('/odom', Odometry) #オドメトリ
+  mf = message_filters.ApproximateTimeSynchronizer([scan_subscriber, odom_subscriber], 10, 0.05) #オドメトリとスキャンデータの同期
+  mf.registerCallback(callback) 
   rospy.spin()
 
 if __name__ == '__main__':
    rospy.init_node('collect') #ノードの初期化
    args = sys.argv #引数
-   status_csv = 'status' + args[1] + '.csv'
+   status_csv = 'status' + args[1] + '.csv' 
    scan_csv = 'scan' + args[1] + '.csv'
    map_csv = 'map' + args[1] + '.csv'
    f_status = open(status_csv,'w')
