@@ -40,7 +40,7 @@ for data in range(1009): #スキャンデータの数
   deg = rad*data
   theta.insert(0, deg*pi/float(180))
 
-#指定した行を含めた100行文の特徴量を求める
+#指定した行を含めた1000行文の特徴量を求める
 for data in range(1000):
   r = scan[data+where:data+where+1] #指定した行を含めた100行文のデータ
   x = []
