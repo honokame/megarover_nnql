@@ -98,7 +98,7 @@ def random():
   rosparam.set_param("/move_base/base_global_planner", "rrtstar_planner/RRT")
   p = call(['rosnode','kill','move_base'])
   ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-  while not ac.wait_for_server(rospy.Duration(10)):
+  while not ac.wait_for_server(rospy.Duration(5)):
     rospy.loginfo('wait server')
   goal = MoveBaseGoal()
   goal.target_pose.header.frame_id = 'map'
