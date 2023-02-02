@@ -5,7 +5,7 @@
 
   <!-- gazebo world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find world)/worlds/room.world"/>
+    <arg name="world_name" value="$(find world)/worlds/dataset3.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="false"/>
@@ -62,11 +62,21 @@
     <param name="local_costmap/laser_scan_sensor/sensor_frame" value="laser_link" /><!--lrf_link?-->
     <param name="local_costmap/laser_scan_sensor/topic" value="scan" />
     <param name="local_costmap/global_frame" value="odom" />
-    <param name="local_costmap/robot_base_frame" value="base_link" />
-    <!--remap from="cmd_vel" to="diff_drive_controller/cmd_vel" /-->
-    <!--remap from="odom" to="diff_drive_controller/odom" /-->
+    <param name="local_costmap/robot_base_frame" value="base_link" /> 
+    <!--frontier
+    <param name="base_global_planner" value="global_planner/GlobalPlanner"/>
+    <param name="global_costmap/inflation_layer/inflation_radius" value="0.35"/>
+    <param name="local_costmap/width" value="3"/>
+    <param name="local_costmap/height" value="3"/>
+    -->
+    <!--RRT
+    <param name="base_global_planner" value="rrtstar_planner/RRT"/>
+    <param name="global_costmap/inflation_layer/inflation_radius" value="0.25"/>
+    <param name="local_costmap/width" value="2"/>
+    <param name="local_costmap/height" value="2"/>
+    -->
   </node>
 
   <!-- rviz -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+  <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /-->
  </launch>
