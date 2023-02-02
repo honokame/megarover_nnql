@@ -215,10 +215,6 @@ if __name__ == '__main__':
     env_list = []
     eps = 1/(0.1*(episode)+1) 
     
-    if episode%25 == 0:
-        map_num = str(episode)+'_0'
-        os.system('rosrun map_server map_saver -f NNQL/{}'.format(map_num))
-
     #for i in range(4): #step
     while(step < 5):
       print("---------------------------------------------------------------------")
@@ -254,9 +250,6 @@ if __name__ == '__main__':
       occupancy = get_occupancy()
       temp_dis = get_distance()
       distance = distance + temp_dis  
-      if episode%25 == 0:
-        map_num = str(episode)+'_'+str(step)
-        os.system('rosrun map_server map_saver -f NNQL/{}'.format(map_num))
       step = step+1
       result_action = str(action_index)+','
       f_result.write(result_action)
