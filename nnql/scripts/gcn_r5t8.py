@@ -21,7 +21,7 @@ train_df = 'dataset/r5t8/scan' + sys.argv[1] + '/feature' + sys.argv[1] + '.csv'
 train_pf = 'dataset/statusclass' + sys.argv[1] + '.csv'
 test_df = 'dataset/r5t8/scan' + sys.argv[2] + '/feature' + sys.argv[2] + '.csv'
 test_pf = 'dataset/statusclass' + sys.argv[2] + '.csv'
-model_f = 'dataset/model_r5t8' + sys.argv[1] + sys.argv[2] + '.pth'
+model_f = 'dataset/model_r5t8_' + sys.argv[1] + sys.argv[2] + '.pth'
 
 #訓練データ読み込み
 train_data = np.loadtxt(fname=train_df,  dtype="int",  delimiter=",")
