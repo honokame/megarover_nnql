@@ -138,7 +138,7 @@ def get_reward(occupancy_init, occupancy, distance):
   #rate = occupancy/float(12520)*100 #既知領域÷距離
   rate = (occupancy-occupancy_init)/float(12520)*100 #増加面積÷移動距離
   reward = rate/float(distance) 
-  rospy.loginfo('init:%f, occupancy:%f, distance:%f, reward:%f',occupancy_init,occupancy, distance, reward)
+  rospy.loginfo('init:%d, occupancy:%d, distance:%f, reward:%f',occupancy_init,occupancy, distance, reward)
   return reward
 
 def start():
@@ -190,7 +190,7 @@ if __name__ == '__main__':
   f_result = open(result_csv,'w')
   qdata_path = 'NNQL/Qdatabase'
   episode = 1 #901
-  max_episode = 100000
+  max_episode = 600
   step = 1
   NNQL = NNQL_class(qdata_path) #NNQL
   Qdatabase = NNQL.mk_Qdatabase(episode) #Qデータベース作成
