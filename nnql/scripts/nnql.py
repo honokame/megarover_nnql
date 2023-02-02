@@ -126,22 +126,19 @@ def get_occupancy(): #14000:100%,11200:80%
   mapdata = msg.data
   occupancy = len(mapdata) - mapdata.count(-1)
   rospy.loginfo('occupancy cell:%d',occupancy)
-  rate = occupancy/float(14000)*100
-  return rate
+  #rate = occupancy/float(14000)*100
+  return occupancy
 
 def get_distance():
   temp_dis = np.loadtxt(fname="temp_dis.csv", dtype="float", delimiter=",")
   rospy.loginfo('temp_dis:%f',temp_dis)
   return temp_dis
 
-def get_reward(occupancy, distance):
-  #if(occupancy <= 40):
-  #  reward = -1
-  #elif(distance <= 10):
-  #  reward = -1
-  #else:
-  reward = occupancy/float(distance)
-  rospy.loginfo('occupancy:%f, distance:%f, reward:%f',occupancy, distance, reward)
+def get_reward(occupancy_init, occupancy, distance):
+  #rate = occupancy/float(14000)*100 #既知領域÷距離
+  rate = (occupancy-occupancy_init)/float(14000)*100 #増加面積÷移動距離
+  reward = rate/float(distance) 
+  rospy.loginfo('init:%f, occupancy:%f, distance:%f, reward:%f',occupancy_init,occupancy, distance, reward)
   return reward
 
 def start():
@@ -253,7 +250,7 @@ if __name__ == '__main__':
       step = step+1
       result_action = str(action_index)+','
       f_result.write(result_action)
-    reward = get_reward(occupancy, distance) #報酬
+    reward = get_reward(occupancy_init, occupancy, distance) #報酬
     result_episode = str(reward)+','+str(occupancy_init)+','+str(occupancy)+','+str(distance)+'\n'
     f_result.write(result_episode)
     for env in env_list:
