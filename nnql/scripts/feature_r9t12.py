@@ -12,7 +12,6 @@ def shapecontext(scan):
   x = []
   y = []
   r = scan
-  print(len(r))
   theta = []
   deg = 0
   rad = 180 / float(1008)
