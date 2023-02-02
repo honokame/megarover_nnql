@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#データセット3のパラメータ
 import numpy as np
 
 import rospy
@@ -21,6 +21,8 @@ import actionlib #random()
 from actionlib_msgs.msg import * #random()
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal #random()
 from learn import NNQL_class
+import rosparam
+import rosnode
 
 def set_model(name, x, y, z, yaw): #指定位置にセット
   model_state = ModelState()
@@ -81,25 +83,34 @@ def wall():
   rospy.sleep(1)
 
 def frontier():
+  rosparam.set_param("/move_base/global_costmap/inflation_layer/inflation_radius","0.35") 
+  rosparam.set_param("/move_base/local_costmap/width","3")
+  rosparam.set_param("/move_base/local_costmap/height","3")
+  rosparam.set_param("/move_base/base_global_planner", "global_planner/GlobalPlanner")
+  p = call(['rosnode','kill','move_base'])
   p = call(['rosrun','explore_lite','explore'])
   rospy.sleep(1)
 
-def random():
+def random(): 
+  rosparam.set_param("/move_base/global_costmap/inflation_layer/inflation_radius","0.25")
+  rosparam.set_param("/move_base/local_costmap/width","2")
+  rosparam.set_param("/move_base/local_costmap/height","2")
+  rosparam.set_param("/move_base/base_global_planner", "rrtstar_planner/RRT")
+  p = call(['rosnode','kill','move_base'])
   ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
   while not ac.wait_for_server(rospy.Duration(5)):
     rospy.loginfo('wait server')
   goal = MoveBaseGoal()
   goal.target_pose.header.frame_id = 'map'
   goal.target_pose.header.stamp = rospy.Time.now()
-  goal.target_pose.pose.position.x = np.random.randint(0,8)*np.random.rand()
-  goal.target_pose.pose.position.y = np.random.randint(0,5)*np.random.rand()
-  yaw = np.random.randint(0,361)
+  goal.target_pose.pose.position.x = 0
+  goal.target_pose.pose.position.y = 0
   goal.target_pose.pose.orientation.x = 0
   goal.target_pose.pose.orientation.y = 0
-  goal.target_pose.pose.orientation.z = np.sin((yaw*np.pi/180) / 2)
-  goal.target_pose.pose.orientation.w = np.cos((yaw*np.pi/180) / 2)
+  goal.target_pose.pose.orientation.z = 0
+  goal.target_pose.pose.orientation.w = 1
   ac.send_goal(goal) 
-  rospy.sleep(20)
+  rospy.sleep(40)
   p = call(['rosnode','kill','move_base'])
   rospy.sleep(1)
 
@@ -115,55 +126,55 @@ def get_occupancy(): #14000:100%,11200:80%
   mapdata = msg.data
   occupancy = len(mapdata) - mapdata.count(-1)
   rospy.loginfo('occupancy cell:%d',occupancy)
-  rate = occupancy/float(14000)*100
-  return rate
+  #rate = occupancy/float(14000)*100
+  return occupancy
 
 def get_distance():
   temp_dis = np.loadtxt(fname="temp_dis.csv", dtype="float", delimiter=",")
   rospy.loginfo('temp_dis:%f',temp_dis)
   return temp_dis
 
-def get_reward(occupancy, distance):
-  if(occupancy <= 40):
-    reward = -1
-  elif(distance <= 10):
-    reward = -1
-  else:
-    reward = occupancy/float(distance)
-  rospy.loginfo('occupancy:%f, distance:%f, reward:%f',occupancy, distance, reward)
+def get_reward(occupancy_init, occupancy, distance):
+  #rate = occupancy/float(12520)*100 #既知領域÷距離
+  rate = (occupancy-occupancy_init)/float(12520)*100 #増加面積÷移動距離
+  reward = rate/float(distance) 
+  rospy.loginfo('init:%d, occupancy:%d, distance:%f, reward:%f',occupancy_init,occupancy, distance, reward)
   return reward
 
 def start():
   seed = np.random.randint(0,19) #19
   yaw = np.random.randint(0,361)
   if(seed < 8): #0-7
-    x = np.random.uniform(0.5,7.2)
+    x = np.random.uniform(0.5,7.0)
     if((x >= 1.7) & (x < 2.3)):
       y = 2.4
     else:
       y = np.random.uniform(2.2,2.4)
   elif(seed < 12): #8-11
-    x = np.random.uniform(1.6,4.3)
-    if((x >= 1.8) & (x <= 2.9) | ((x >= 3.7) & (x <= 4.3))):
-      y = 5.3
+    x = np.random.uniform(1.4,3.6)
+    #if((x >= 1.8) & (x <= 2.9) | ((x >= 3.7) & (x <= 4.3))): 
+    if((x >= 1.4) & (x <= 2.9)):
+      y = 5.05 #5.3
+      f = np.random.randint(0,2)
+      yaw = 180*f
     else:
-      y = np.random.uniform(5.3,5.5)
+      y = np.random.uniform(5.2,5.3)
   elif(seed < 14): #12-13
-    x = 1
-    y = np.random.uniform(2.4,5.0)
+    x = 0.95
+    y = np.random.uniform(2.4,4.8)
     f = np.random.randint(1,3)
     yaw = 90*f
   elif(seed == 16): #14-15
-    x = 4.4
-    y = np.random.uniform(2.4,5.0) 
+    x = 4.1
+    y = np.random.uniform(3.2,4.6) 
     f = np.random.randint(1,3)
     yaw = 90*f
   elif(seed < 19): #16-18
-    x = np.random.uniform(7.4,7.4)
-    y = np.random.uniform(3.6,4.9)
+    x = 7.4
+    y = np.random.uniform(3.4,4.7)
   elif(seed < 20): # 19   
     x = np.random.uniform(8.1,8.4)
-    y = np.random.uniform(5.2,5.9)
+    y = np.random.uniform(5.2,5.5)
   return x,y,yaw
   
 if __name__ == '__main__':
@@ -175,12 +186,14 @@ if __name__ == '__main__':
   #scan_csv = 'scan' + args[1] + '.csv'
   f_status = open(status_csv,'w')
   #f_scan = open(scan_csv,'w')
+  result_csv = 'NNQL/result.csv'
+  f_result = open(result_csv,'w')
   qdata_path = 'NNQL/Qdatabase'
-  episode = 1
-  max_episode = 10000
+  episode = 1 #901
+  max_episode = 600
   step = 1
   NNQL = NNQL_class(qdata_path) #NNQL
-  Qdatabase = NNQL.mk_Qdatabase(episode,0) #Qデータベース作成
+  Qdatabase = NNQL.mk_Qdatabase(episode) #Qデータベース作成
   use_Qdatabase = Qdatabase #使用するデータベース
   action_list = ["frontier", "wall", "random"] #行動集合
   #for j in range(episode): #episode
@@ -194,17 +207,13 @@ if __name__ == '__main__':
     get_status('vmegarover')
     scan = get_scan()
     now_state = get_rrf(scan)
-    get_occupancy()
+    occupancy_init =  get_occupancy()
     
     env_list = []
     #eps = 1/(0.1*(episode)+1) 
     
     #for i in range(4): #step
     while(step < 5):
-      if episode%25 == 0:
-        map_num = str(episode)+'_0'
-        os.system('rosrun map_server map_saver -f NNQL/{}'.format(map_num))
-
       print("---------------------------------------------------------------------")
       rospy.loginfo('%dstep',step)
       #eps_random = np.random.rand()
@@ -214,11 +223,10 @@ if __name__ == '__main__':
       #  action_index = np.random.choice(action_maxIndex) # action_index = max(q_avg)
       #  action = action_list[action_index]
       #else:
-      #q_average = list([0]*3)
+      #  q_average = list([0]*3)
       action_index = np.random.randint(0, 3)
-      #knn_list = None
+      #  knn_list = None
       action = action_list[action_index]
-
       Qdatabase = NNQL.Q_data_add(now_state,q_average,Qdatabase)  #qデータベース追加
       
       rospy.loginfo('action:%s',action)
@@ -239,12 +247,12 @@ if __name__ == '__main__':
       occupancy = get_occupancy()
       temp_dis = get_distance()
       distance = distance + temp_dis  
-      if episode%25 == 0:
-        map_num = str(episode)+'_'+str(step)
-        os.system('rosrun map_server map_saver -f NNQL/{}'.format(map_num))
       step = step+1
-
-    reward = get_reward(occupancy, distance) #報酬
+      result_action = str(action_index)+','
+      f_result.write(result_action)
+    reward = get_reward(occupancy_init, occupancy, distance) #報酬
+    result_episode = str(reward)+','+str(occupancy_init)+','+str(occupancy)+','+str(distance)+'\n'
+    f_result.write(result_episode)
     for env in env_list:
       state = env[0]
       state_next = env[1]
