@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#データセット3のパラメータ
 import numpy as np
 
 import rospy
@@ -135,8 +135,8 @@ def get_distance():
   return temp_dis
 
 def get_reward(occupancy_init, occupancy, distance):
-  #rate = occupancy/float(14000)*100 #既知領域÷距離
-  rate = (occupancy-occupancy_init)/float(14000)*100 #増加面積÷移動距離
+  #rate = occupancy/float(12520)*100 #既知領域÷距離
+  rate = (occupancy-occupancy_init)/float(12520)*100 #増加面積÷移動距離
   reward = rate/float(distance) 
   rospy.loginfo('init:%f, occupancy:%f, distance:%f, reward:%f',occupancy_init,occupancy, distance, reward)
   return reward
