@@ -148,33 +148,36 @@ def start():
   seed = np.random.randint(0,19) #19
   yaw = np.random.randint(0,361)
   if(seed < 8): #0-7
-    x = np.random.uniform(0.5,7.2)
+    x = np.random.uniform(0.5,7.0)
     if((x >= 1.7) & (x < 2.3)):
       y = 2.4
     else:
       y = np.random.uniform(2.2,2.4)
   elif(seed < 12): #8-11
-    x = np.random.uniform(1.6,4.3)
-    if((x >= 1.8) & (x <= 2.9) | ((x >= 3.7) & (x <= 4.3))):
-      y = 5.3
+    x = np.random.uniform(1.4,3.6)
+    #if((x >= 1.8) & (x <= 2.9) | ((x >= 3.7) & (x <= 4.3))): 
+    if((x >= 1.4) & (x <= 2.9)):
+      y = 5.05 #5.3
+      f = np.random.randint(0,2)
+      yaw = 180*f
     else:
-      y = np.random.uniform(5.3,5.5)
+      y = np.random.uniform(5.2,5.3)
   elif(seed < 14): #12-13
-    x = 1
-    y = np.random.uniform(2.4,5.0)
+    x = 0.95
+    y = np.random.uniform(2.4,4.8)
     f = np.random.randint(1,3)
     yaw = 90*f
   elif(seed == 16): #14-15
-    x = 4.4
-    y = np.random.uniform(2.4,5.0) 
+    x = 4.1
+    y = np.random.uniform(3.2,4.6) 
     f = np.random.randint(1,3)
     yaw = 90*f
   elif(seed < 19): #16-18
-    x = np.random.uniform(7.4,7.4)
-    y = np.random.uniform(3.6,4.9)
+    x = 7.4
+    y = np.random.uniform(3.4,4.7)
   elif(seed < 20): # 19   
     x = np.random.uniform(8.1,8.4)
-    y = np.random.uniform(5.2,5.9)
+    y = np.random.uniform(5.2,5.5)
   return x,y,yaw
   
 if __name__ == '__main__':
