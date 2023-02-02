@@ -12,10 +12,11 @@ def shapecontext(scan):
   x = []
   y = []
   r = scan
+  print(len(r))
   theta = []
   deg = 0
-  rad = 180 / float(1010)
-  node = [57, 169, 281, 393, 505, 617, 729, 841, 953]
+  rad = 180 / float(1008)
+  node = [56, 168, 280, 392, 504, 616, 728, 840, 952]
   pos_x = []
   pos_y = []
   diff_x = []
@@ -26,7 +27,7 @@ def shapecontext(scan):
   area = []
   feature = []
 
-  for data in range(1011):
+  for data in range(1009):
     deg = rad*data
     theta.insert(0, deg*pi/float(180))
 
@@ -75,6 +76,8 @@ def shapecontext(scan):
     
       if(str(tmp_d) == "inf"):
         tmp_dis = 100
+      elif(str(tmp_d) == "nan"):
+        tmp_dis = 100
       else:
         tmp_dis = int(tmp_d)+1
 
@@ -98,7 +101,6 @@ def shapecontext(scan):
         tmp_b = tmp_theta * 9
       else:
         tmp_b = 110
-        print(tmp_dis)
     
       area.append(tmp_b)
     for c in range(108):
