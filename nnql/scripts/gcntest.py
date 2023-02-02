@@ -101,12 +101,12 @@ class Classifier(nn.Module):
         return self.classify(hg)
 
 feature = 108  #r9t12:108 r9t8:72 r5:t8:40
-classes = 208  #26,208,312
+classes = 26  #26,208,312
 model = Classifier(feature, 256, classes)
 
 ####  test ###################################
 
-model.load_state_dict(torch.load('data/r9t12/model347_208_e50.pth')) #学習済みモデル読み込み
+model.load_state_dict(torch.load('dataset/model_r9t12_12.pth')) #学習済みモデル読み込み
 model.eval()
 test_X, test_Y = map(list, zip(*testset))
 test_bg = dgl.batch(test_X)
