@@ -23,6 +23,8 @@ test_df = 'dataset/r9t12/scan' + sys.argv[2] + '/feature' + sys.argv[2] + '.csv'
 test_pf = 'dataset/statusclass' + sys.argv[2] + '.csv'
 model_f = 'dataset/model_r9t12_' + sys.argv[1] + sys.argv[2] + '.pth'
 
+epoch_count = int(sys.argv[3])
+
 #訓練データ読み込み
 train_data = np.loadtxt(fname=train_df,  dtype="int",  delimiter=",")
 train_place = np.loadtxt(fname=train_pf, dtype="int", delimiter=",")
@@ -147,7 +149,7 @@ optimizer = optim.Adam(model.parameters(),lr=0.001) #0.001
 model.train()
 
 epoch_losses = []
-for epoch in range(5):
+for epoch in range(epoch_count):
     epoch_loss = 0
     for iter, (bg, label) in enumerate(data_loader):
         prediction = model(bg)
