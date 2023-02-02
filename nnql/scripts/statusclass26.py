@@ -4,16 +4,18 @@
 import pandas as pd
 import sys
 
-input_file = 'status' + sys.argv[1] + '.csv' #入力ファイル
+input_file = 'dataset/status' + sys.argv[1] + '.csv' #入力ファイル
 data = pd.read_csv(input_file, header=None) #入力ファイル読み込み
-data = data.assign(place = 0,place60 = 0,place30 = 0) #場所クラスの列を作成
+data = data.assign(place = 0)#,place60 = 0,place30 = 0) #場所クラスの列を作成
+output_file = 'dataset/statusclass' + sys.argv[1] + '.csv' #出力ファイル
 
-output_file = 'statusclass' + sys.argv[1] + '.csv' #出力ファイル
+data = data.astype('int')
 
 for index,row in data.iterrows():
-  x = int(row[1])
-  y = int(row[2])
-  t = int(row[3])
+  x = row[1]
+  y = row[2]
+  t = row[3]
+
   #場所クラス
   if(y == 0):
     row[4] = 26 
@@ -77,8 +79,10 @@ for index,row in data.iterrows():
       row[4] = 16
     if(x == 8):
       row[4] = 17
-  elif(y == 5):
+  elif(y==5):
     if((x == 0) | (x == 1)):
+      row[4] = 18
+    if(x == 1):
       row[4] = 18
     if(x == 2):
       row[4] = 19
@@ -102,14 +106,16 @@ for index,row in data.iterrows():
     if(x == 3):
       row[4] = 20
     if(x == 4):
-      row[6] = 21
+      row[4] = 21
+    if(x == 6):
+      row[4] = 24
     if((x == 7) | (x == 8)):
       row[4] = 24
   elif(y == 7):
     row[4] = 24
   else:
-      row[4] = 0
-
+    row[4] = 100
+"""
   #角度クラス
   if(t < 23):
     row[5] = row[4]*8-7
@@ -156,5 +162,5 @@ for index,row in data.iterrows():
     row[6] = row[4]*12
   else:
     row[6] = row[4]*12-11
-
+"""
 data.to_csv(output_file, header=None,index=None)
