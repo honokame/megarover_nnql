@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <arg name="model" default="$(find model)/robots/vmegarover.urdf.xacro"/>
+  <arg name="rvizconfig" default="$(find model)/configuration_files/rviz/move_base.rviz"/>  
+
+  <!-- gazebo world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find world)/worlds/dataset3.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="false"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <!-- load the urdf into the ros parameter server -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)'" />
+  <!--param name="target_sdf" textfile="$(find world)/models/checkerboard_plane/checkerboard_plane.sdf"/-->
+  <node name="mega_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model vmegarover -param robot_description -x 1 -y 2.3 -z 0 -R 0 -P 0 -Y 0 "/>
+  <!--node name="target_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model target -param target_sdf -x 5 -y 2 -z 0.01 -R 0 -P 0 -Y 0"/-->
+  
+  <!-- key control -->
+  <!--include file="$(find model)/launch/keycontrol.launch"/-->
+
+  <!-- controll -->
+  <include file="$(find model)/launch/control.launch"/>
+
+  <!-- map server -->
+  <!--<arg name="map_file" default="$(find model)/map/sample.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>-->
+  
+  <!-- amcl -->
+  <!--<node pkg="amcl" type="amcl" name="amcl" output="screen" args="/scan:=/scan" clear_params="true">
+    <rosparam command="load" file="$(find model)/configuration_files/amcl.yaml"/>
+    <param name="base_frame_id" value="base_link"/>
+    <param name="odom_frame_id" value="odom" />
+    <param name="global_frame_id" value="map"/>
+  </node>-->
+
+  <!-- gmapping -->
+  <node pkg="gmapping" type="slam_gmapping" respawn="true" name="slam_gmapping" output="screen" args="/scan:=scan" clear_params="true">
+    <rosparam command="load" file="$(find model)/configuration_files/gmapping.yaml"/>
+    <param name="base_frame" value="base_link"/>
+    <param name="odom_frame" value="odom" />
+    <param name="map_frame" value="map"/>
+    <param name="xmin" value="-100"/> 
+    <param name="xmax" value="100"/>
+    <param name="ymin" value="-100"/>
+    <param name="ymax" value="100"/>
+  </node>
+
+  <!-- move_base -->
+  <node pkg="move_base" type="move_base" respawn="true" name="move_base" output="screen">
+    <rosparam file="$(find model)/configuration_files/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find model)/configuration_files/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find model)/configuration_files/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find model)/configuration_files/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find model)/configuration_files/dwa_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find model)/configuration_files/move_base_params.yaml" command="load" />
+    <param name="global_costmap/global_frame" value="map" />
+    <param name="global_costmap/robot_base_frame" value="base_link" />
+    <param name="local_costmap/laser_scan_sensor/sensor_frame" value="laser_link" /><!--lrf_link?-->
+    <param name="local_costmap/laser_scan_sensor/topic" value="scan" />
+    <param name="local_costmap/global_frame" value="odom" />
+    <param name="local_costmap/robot_base_frame" value="base_link" /> 
+    <!--frontier
+    <param name="base_global_planner" value="global_planner/GlobalPlanner"/>
+    <param name="global_costmap/inflation_layer/inflation_radius" value="0.35"/>
+    <param name="local_costmap/width" value="3"/>
+    <param name="local_costmap/height" value="3"/>
+    -->
+    <!--RRT-->
+    <param name="base_global_planner" value="rrtstar_planner/RRT"/>
+    <param name="global_costmap/inflation_layer/inflation_radius" value="0.25"/>
+    <param name="local_costmap/width" value="2"/>
+    <param name="local_costmap/height" value="2"/>
+    
+  </node>
+
+  <!-- rviz -->
+  <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /-->
+ </launch>
