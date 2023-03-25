@@ -8,7 +8,7 @@ import tf
 import sys #引数
 import os #ファイル読み書き
 import csv #リストをcsvに書き込み
-import feature_r9t12 as feature #特徴量計算
+import feature_r9t8 as feature #特徴量計算
 import random
 from subprocess import *
 from gazebo_msgs.srv import SetModelState
@@ -110,7 +110,7 @@ def random():
   goal.target_pose.pose.orientation.z = 0
   goal.target_pose.pose.orientation.w = 1
   ac.send_goal(goal) 
-  rospy.sleep(40)
+  rospy.sleep(25)
   p = call(['rosnode','kill','move_base'])
   rospy.sleep(1)
 
