@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#r9t8
 
 import dgl
 import torch 
@@ -18,7 +19,7 @@ import csv
 
 output_file = 'temp_rrf.csv'
 r_file = open(output_file,'w')
-test_file = 'NNQL/gcntest.csv'
+test_file = 'gcntest.csv'
 t_file = open(test_file,'a')
 
 #テストデータ読み込み
@@ -29,8 +30,8 @@ testset = []
 label = 100 #dummy
 data = test_data.tolist() 
 
-#feature_list = [data[1:73],data[73:145],data[145:217],data[217:289],data[289:361],data[361:433],data[433:505],data[505:577],data[577:649]] #r9t8 
-feature_list = [data[1:109],data[109:217],data[217:325],data[325:433],data[433:541],data[541:649],data[649:757],data[757:865],data[865:973]]#r9t12
+feature_list = [data[1:73],data[73:145],data[145:217],data[217:289],data[289:361],data[361:433],data[433:505],data[505:577],data[577:649]] #r9t8 
+#feature_list = [data[1:109],data[109:217],data[217:325],data[325:433],data[433:541],data[541:649],data[649:757],data[757:865],data[865:973]]#r9t12
 #feature_list = [data[1:41],data[41:81],data[81:121],data[121:161],data[161:201],data[201:241],data[241:281],data[281:321],data[321:361]] #r5t8  
 
 g = dgl.graph(([0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8], [1,0,2,1,3,2,4,3,5,4,6,5,7,6,8,7]))      # edge
@@ -100,13 +101,13 @@ class Classifier(nn.Module):
         hg = dgl.mean_nodes(g, 'h')
         return self.classify(hg)
 
-feature = 108  #r9t12:108 r9t8:72 r5:t8:40
+feature = 72  #r9t12:108 r9t8:72 r5:t8:40
 classes = 26  #26,208,312
 model = Classifier(feature, 256, classes)
 
 ####  test ###################################
 
-model.load_state_dict(torch.load('dataset/model_r9t12_12.pth')) #学習済みモデル読み込み
+model.load_state_dict(torch.load('dataset/model_r9t8_12_e50.pth')) #学習済みモデル読み込み
 model.eval()
 test_X, test_Y = map(list, zip(*testset))
 test_bg = dgl.batch(test_X)
