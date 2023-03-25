@@ -31,3 +31,7 @@ COPYRIGHT
 ---------
 
 Packages are licensed under BSD license. See respective files for details.
+
+# 追記
+`explore`：フロンティア法、使用していたプログラム  
+`map_merge`：複数ロボットでのフロンティア法、使用していない  
