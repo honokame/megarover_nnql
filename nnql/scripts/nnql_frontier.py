@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#データセット3のパラメータ
+#データセット4のパラメータ
 import numpy as np
 
 import rospy
@@ -112,7 +112,7 @@ def random():
   goal.target_pose.pose.orientation.z = 0
   goal.target_pose.pose.orientation.w = 1
   ac.send_goal(goal) 
-  rospy.sleep(40)
+  rospy.sleep(25)
   p = call(['rosnode','kill','move_base'])
   rospy.sleep(1)
 
@@ -137,8 +137,8 @@ def get_distance():
   return temp_dis
 
 def get_reward(occupancy_init, occupancy, distance):
-  #rate = occupancy/float(12520)*100 #既知領域÷距離
-  rate = (occupancy-occupancy_init)/float(12520)*100 #増加面積÷移動距離
+  #rate = occupancy/float(12970)*100 #既知領域÷距離
+  rate = (occupancy-occupancy_init)/float(12970)*100 #増加面積÷移動距離
   reward = rate/float(distance) 
   rospy.loginfo('init:%d, occupancy:%d, distance:%f, reward:%f',occupancy_init,occupancy, distance, reward)
   return reward
@@ -148,35 +148,40 @@ def start():
   yaw = np.random.randint(0,361)
   if(seed < 8): #0-7
     x = np.random.uniform(0.5,7.0)
-    if((x >= 1.7) & (x < 2.3)):
+    if((x >= 1.5) & (x < 1.9)):
       y = 2.4
     else:
-      y = np.random.uniform(2.2,2.4)
-  elif(seed < 12): #8-11
-    x = np.random.uniform(1.4,3.6)
+      y = 2.25
+  elif(seed < 11): #8-11
+    x = np.random.uniform(1.4,2.1)
     #if((x >= 1.8) & (x <= 2.9) | ((x >= 3.7) & (x <= 4.3))): 
-    if((x >= 1.4) & (x <= 2.9)):
-      y = 5.05 #5.3
+    if((x >= 1.4) & (x <= 2.1)):
+      y = 4.8 #5.3
       f = np.random.randint(0,2)
       yaw = 180*f
-    else:
-      y = np.random.uniform(5.2,5.3)
+    #else:
+    #  y = np.random.uniform(5.2,5.3)
+  elif(seed < 12): #8-11
+    x = np.random.uniform(2.4,2.9)
+    y = 4.95 #5.3
+    f = np.random.randint(0,2)
+    yaw = 180*f
   elif(seed < 14): #12-13
-    x = 0.95
-    y = np.random.uniform(2.4,4.8)
+    x = 0.85
+    y = np.random.uniform(2.4,4.5)
     f = np.random.randint(1,3)
     yaw = 90*f
   elif(seed == 16): #14-15
-    x = 4.1
+    x = 4.15
     y = np.random.uniform(3.2,4.6) 
     f = np.random.randint(1,3)
     yaw = 90*f
   elif(seed < 19): #16-18
     x = 7.4
-    y = np.random.uniform(3.4,4.7)
+    y = np.random.uniform(3.2,4.9)
   elif(seed < 20): # 19   
-    x = np.random.uniform(8.1,8.4)
-    y = np.random.uniform(5.2,5.5)
+    x = np.random.uniform(8.0,8.2)
+    y = np.random.uniform(5.2,5.9)
   return x,y,yaw
   
 if __name__ == '__main__':
@@ -184,13 +189,13 @@ if __name__ == '__main__':
 
   #args = sys.argv #引数
   #status_csv = 'status' + args[1] + '.csv'
-  status_csv = 'NNQL/groundtruth.csv'
+  status_csv = 'NNQL_frontier/groundtruth.csv'
   #scan_csv = 'scan' + args[1] + '.csv'
   f_status = open(status_csv,'w')
   #f_scan = open(scan_csv,'w')
-  result_csv = 'NNQL/result.csv'
+  result_csv = 'NNQL_frontier/result.csv'
   f_result = open(result_csv,'w')
-  qdata_path = 'NNQL/Qdatabase'
+  qdata_path = 'NNQL_frontier/Qdatabase'
   episode = 1 #901
   max_episode = 600
   step = 1
@@ -219,15 +224,17 @@ if __name__ == '__main__':
       print("---------------------------------------------------------------------")
       rospy.loginfo('%dstep',step)
       #eps_random = np.random.rand()
-      #if not (episode < 25 or eps>eps_random) :
-      q_average,knn_list = NNQL.knn(now_state,use_Qdatabase) #knn,now_state=クラス固有ベクトル
-      action_maxIndex = [i for i, x in enumerate(q_average) if x == max(q_average)]
+      if not (episode < 25):
+        q_average,knn_list = NNQL.knn(now_state,use_Qdatabase) #knn,now_state=クラス固有ベクトル
+        action_maxIndex = [i for i, x in enumerate(q_average) if x == max(q_average)]
       #  action_index = np.random.choice(action_maxIndex) # action_index = max(q_avg)
       #  action = action_list[action_index]
-      #else:
-      #  q_average = list([0]*3)
+      else:
+        q_average = list([0]*3)
+      #  action_index = 0 #frontier
+        knn_list = None
+      
       action_index = 0 #frontier
-      #  knn_list = None
       action = action_list[action_index]
       Qdatabase = NNQL.Q_data_add(now_state,q_average,Qdatabase)  #qデータベース追加
       
