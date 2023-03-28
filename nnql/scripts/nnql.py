@@ -176,6 +176,12 @@ def start():
     x = np.random.uniform(8.1,8.4)
     y = np.random.uniform(5.2,5.5)
   return x,y,yaw
+
+def simple_start():
+  x = np.random.uniform(7.2,7.4) #0.15
+  y = np.random.uniform(2.9,4.7) #0.9
+  yaw = np.random.randint(-45,45)
+  return x,y,yaw
   
 if __name__ == '__main__':
   rospy.init_node('nnql') #ノードの初期化
